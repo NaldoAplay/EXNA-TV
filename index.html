@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EXNA TV</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="app.js" defer></script>
+
+</head>
+
+<body>
+
+<div id="intro">
+  <h1><span class="exna">EXNA</span> <span class="tv">TV</span></h1>
+</div>
+
+<div id="welcome">
+  <div class="box">
+    <h2><span class="exna">EXNA</span> <span class="tv">TV</span></h2>
+    <input id="iptvInput" placeholder="Cole sua lista IPTV">
+    <button onclick="salvarLista()">Entrar</button>
+  </div>
+</div>
+
+<div id="app">
+
+  <div id="sidebar">
+    <div id="channelList"></div>
+  </div>
+
+  <div id="playerArea">
+
+    <video id="video" autoplay muted playsinline></video>
+
+    <!-- HEADER -->
+<!-- HEADER -->
+<div id="header">
+
+  <!-- ESQUERDA -->
+  <div class="left">
+    <span class="exna">EXNA</span> <span class="tv">TV</span>
+  </div>
+
+  <!-- BUSCA (CENTRO) -->
+  <input id="busca" placeholder="Buscar canal..." />
+
+  <!-- PERFIL (DIREITA) -->
+  <div class="right" data-focus="perfil" onclick="abrirPerfil()">
+    <img id="userPhoto" src="https://via.placeholder.com/100">
+    <span id="userName">Usuário</span>
+  </div>
+
+</div>
+
+<!-- MODAL PERFIL -->
+<div id="perfilModal">
+
+  <div class="perfilBox">
+
+    <h2>Perfil</h2>
+
+    <input id="inputNome" placeholder="Seu nome">
+    <input type="file" id="inputFotoFile" accept="image/*">
+
+    <textarea id="inputLista" placeholder="Sua lista IPTV"></textarea>
+
+    <button onclick="salvarPerfil()">Salvar</button>
+    <button onclick="fecharPerfil()">Fechar</button>
+
+  </div>
+
+</div>
+
+    <!-- TOPO -->
+    <div class="topBar">
+      <div class="logoPlayer">
+        <span class="exna">EXNA</span> <span class="tv">TV</span>
+      </div>
+      <div id="clock"></div>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="controls">
+      <button data-focus="play" onclick="togglePlay()">▶</button>
+<button data-focus="mute" onclick="toggleMute()">🔊</button>
+<button ontouchstart="fullscreenMobile()" onclick="fullscreenMobile()">⛶</button>
+    </div>
+    
+
+    <!-- INFO -->
+    <div class="info">
+      <h2 id="titulo"></h2>
+    </div>
+
+  </div>
+
+</div>
+<div id="contextMenu">
+  <button onclick="addFavorito()">⭐ Adicionar aos favoritos</button>
+</div>
+</body>
+</html>
