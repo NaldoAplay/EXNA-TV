@@ -136,20 +136,34 @@
             document.getElementById('top-clock').innerText = time;
         }
 
-        async function carregarSistema() {
-            try {
-                const res = await fetch(LISTA_BR);
-                const text = await res.text();
-                parsearLista(text);
-                
-                if (db["FAVORITOS"].length > 0) {
-                    catIdx = categorias.indexOf("FAVORITOS");
-                } else {
-                    catIdx = 0;
-                }
-                iniciarCanal(catIdx, 0);
-            } catch (e) { console.error("Erro na lista"); }
+        // Substitua a sua função carregarSistema por esta:
+async function carregarSistema() {
+    try {
+        // Usando o Proxy para evitar a tela roxa/preta e liberar o sinal na TV
+        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR);
+        
+        const res = await fetch(proxyUrl);
+        const text = await res.text();
+        parsearLista(text);
+        
+        // Define a categoria inicial (Favoritos ou a primeira da lista)
+        if (db["FAVORITOS"].length > 0) {
+            catIdx = categorias.indexOf("FAVORITOS");
+        } else {
+            catIdx = 0;
         }
+        
+        // Inicia o canal com o sinal já liberado
+        iniciarCanal(catIdx, 0);
+    } catch (e) { 
+        console.error("Erro na lista ou bloqueio de sinal"); 
+        // Tentativa de carregamento direto caso o proxy falhe
+        const resManual = await fetch(LISTA_BR);
+        const textManual = await resManual.text();
+        parsearLista(textManual);
+        iniciarCanal(0, 0);
+    }
+}
 
         function parsearLista(data) {
             db = { "FAVORITOS": [] };
