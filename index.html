@@ -9,12 +9,13 @@
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
 
-        /* PLAYER NATIVO (Resolve a tela roxa) */
+        /* PLAYER NATIVO PARA EVITAR TELA ROXA */
         #video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; display: flex; align-items: center; justify-content: center; }
         video { width: 100%; height: 100%; object-fit: contain; }
 
         #top-clock { position: fixed; top: 20px; right: 30px; z-index: 2000; font-size: 22px; font-weight: bold; text-shadow: 2px 2px 5px #000; pointer-events: none; }
 
+        /* MENU LATERAL */
         #channel-menu { 
             position: fixed; left: -450px; top: 0; width: 85%; max-width: 420px; height: 100%; 
             background: var(--panel); z-index: 1000; transition: 0.3s;
@@ -23,9 +24,20 @@
         #channel-menu.open { left: 0; }
         .brand { font-size: 35px; font-weight: 900; margin-bottom: 5px; }
         .x-red { color: var(--red); }
-        .cat-tag { color: var(--red); font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
 
-        #fs-menu-btn { padding: 15px; margin-bottom: 20px; background: #222; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; text-align: center; }
+        /* SELETOR DE CATEGORIA COM BOTÕES PARA CELULAR */
+        .category-selector {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; background: #222; border-radius: 8px; padding: 5px;
+        }
+        .cat-btn {
+            background: var(--red); color: white; border: none; padding: 10px 15px;
+            border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 18px;
+        }
+        .cat-tag { color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; text-align: center; flex: 1; }
+
+        #fs-menu-btn { padding: 15px; margin-bottom: 20px; background: #333; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; text-align: center; }
+        
         .menu-scroll { flex-grow: 1; overflow-y: auto; scroll-behavior: smooth; }
         .menu-scroll::-webkit-scrollbar { display: none; }
         
@@ -34,8 +46,8 @@
             display: flex; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer; border: 3px solid transparent;
         }
 
-        /* FOCO SEM BORDAS BRANCAS */
-        .menu-item.focused, #fs-menu-btn.focused { background: var(--red) !important; transform: scale(1.05); box-shadow: 0 0 20px var(--red); color: white; border-color: transparent; }
+        /* FOCO */
+        .menu-item.focused, #fs-menu-btn.focused { background: var(--red) !important; transform: scale(1.02); box-shadow: 0 0 15px var(--red); color: white; border-color: transparent; }
         .fav-star { margin-left: auto; color: gold; font-size: 22px; display: none; }
         .is-fav .fav-star { display: block; }
 
@@ -54,14 +66,21 @@
 
     <div id="channel-menu">
         <div class="brand">E<span class="x-red">X</span>NA TV</div>
-        <div class="cat-tag" id="cat-label">CARREGANDO...</div>
+        
+        <div class="category-selector">
+            <button class="cat-btn" onclick="mudarCategoria(-1)">❮</button>
+            <div class="cat-tag" id="cat-label">CARREGANDO...</div>
+            <button class="cat-btn" onclick="mudarCategoria(1)">❯</button>
+        </div>
+
         <div id="fs-menu-btn" onclick="toggleFullscreen()">TELA CHEIA</div>
+
         <div class="menu-scroll" id="scroll-box">
             <div id="menu-items"></div>
         </div>
     </div>
 
-    <div class="footer-brand">&COPY; 2026 - EXNA TV</div>
+    <div class="footer-brand">meta-stream tv</div>
 
     <script>
         const video = document.getElementById('main-video');
@@ -83,24 +102,34 @@
                 parsear(text);
                 if (db["FAVORITOS"].length > 0) catIdx = categorias.indexOf("FAVORITOS");
                 iniciarCanal(catIdx, 0);
-            } catch (e) { console.error("Erro"); }
+            } catch (e) { console.error("Erro ao carregar"); }
         }
 
         function parsear(data) {
+            const tempDb = { "FAVORITOS": [] };
             const lines = data.split('\n'); let meta = "";
             lines.forEach(line => {
                 if(line.startsWith('#EXTINF')) meta = line;
                 else if(line.startsWith('http')) {
                     const name = meta.split(',')[1]?.trim() || "Canal";
                     const group = meta.match(/group-title="([^"]+)"/)?.[1]?.toUpperCase() || "BRASIL";
-                    const obj = { name, url: line.trim() };
-                    if(!db[group]) db[group] = [];
-                    db[group].push(obj);
-                    if(favs.includes(obj.url)) db["FAVORITOS"].push(obj);
+                    const url = line.trim();
+                    const obj = { name, url };
+                    if(!tempDb[group]) tempDb[group] = [];
+                    tempDb[group].push(obj);
+                    if(favs.includes(url)) tempDb["FAVORITOS"].push(obj);
                 }
             });
+            db = tempDb;
             categorias = Object.keys(db).filter(c => db[c].length > 0);
             if(db["FAVORITOS"].length > 0) categorias = ["FAVORITOS", ...categorias.filter(c => c !== "FAVORITOS")];
+        }
+
+        function mudarCategoria(dir) {
+            catIdx = (catIdx + dir + categorias.length) % categorias.length;
+            canalIdx = 0;
+            renderizar();
+            resetMenuTimer();
         }
 
         function iniciarCanal(cIdx, chIdx) {
@@ -133,12 +162,11 @@
                 if (i === canalIdx) item.classList.add('focused');
                 item.innerHTML = `<span>${ch.name}</span><span class="fav-star">★</span>`;
                 
-                // TOQUE E MOUSE
                 item.onclick = (e) => { e.stopPropagation(); iniciarCanal(catIdx, i); };
                 container.appendChild(item);
             });
             const active = document.querySelector('.menu-item.focused');
-            if (active) active.scrollIntoView({ block: "center", behavior: "smooth" });
+            if (active && menuAberto) active.scrollIntoView({ block: "center", behavior: "smooth" });
         }
 
         function toggleFullscreen() {
@@ -157,15 +185,8 @@
             } else {
                 if(e.key === "ArrowUp") { if (canalIdx > -1) canalIdx--; renderizar(); }
                 if(e.key === "ArrowDown") { if (canalIdx < db[categorias[catIdx]].length - 1) canalIdx++; renderizar(); }
-                if(e.key === "ArrowLeft") { catIdx = (catIdx + 1) % categorias.length; canalIdx = 0; renderizar(); }
-                if(e.key === "ArrowRight") {
-                    const canal = db[categorias[catIdx]][canalIdx];
-                    if(favs.includes(canal.url)) favs = favs.filter(f => f !== canal.url);
-                    else favs.push(canal.url);
-                    localStorage.setItem('exna_favs', JSON.stringify(favs));
-                    parsear(""); // Refresh simplificado
-                    renderizar();
-                }
+                if(e.key === "ArrowLeft") mudarCategoria(-1);
+                if(e.key === "ArrowRight") mudarCategoria(1);
                 if(e.key === "Enter") canalIdx === -1 ? toggleFullscreen() : iniciarCanal(catIdx, canalIdx);
                 if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
             }
