@@ -9,45 +9,53 @@
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
 
-        /* PLAYER NATIVO PARA EVITAR TELA ROXA */
         #video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; display: flex; align-items: center; justify-content: center; }
         video { width: 100%; height: 100%; object-fit: contain; }
 
         #top-clock { position: fixed; top: 20px; right: 30px; z-index: 2000; font-size: 22px; font-weight: bold; text-shadow: 2px 2px 5px #000; pointer-events: none; }
 
-        /* MENU LATERAL */
         #channel-menu { 
             position: fixed; left: -450px; top: 0; width: 85%; max-width: 420px; height: 100%; 
-            background: var(--panel); z-index: 1000; transition: 0.3s;
+            background: var(--panel); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 30px; border-right: 4px solid var(--red); display: flex; flex-direction: column;
         }
         #channel-menu.open { left: 0; }
         .brand { font-size: 35px; font-weight: 900; margin-bottom: 5px; }
         .x-red { color: var(--red); }
 
-        /* SELETOR DE CATEGORIA COM BOTÕES PARA CELULAR */
-        .category-selector {
+        .category-nav {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 20px; background: #222; border-radius: 8px; padding: 5px;
+            margin-bottom: 15px; background: #222; border-radius: 8px; padding: 5px;
         }
-        .cat-btn {
-            background: var(--red); color: white; border: none; padding: 10px 15px;
-            border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 18px;
-        }
-        .cat-tag { color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; text-align: center; flex: 1; }
+        .nav-btn { background: var(--red); color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .cat-tag { color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; flex: 1; text-align: center; }
 
         #fs-menu-btn { padding: 15px; margin-bottom: 20px; background: #333; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; text-align: center; }
         
-        .menu-scroll { flex-grow: 1; overflow-y: auto; scroll-behavior: smooth; }
-        .menu-scroll::-webkit-scrollbar { display: none; }
+        /* Ajuste de Scroll para TV */
+        .menu-scroll { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            scroll-behavior: smooth; 
+            padding-right: 5px;
+        }
+        .menu-scroll::-webkit-scrollbar { width: 5px; }
+        .menu-scroll::-webkit-scrollbar-thumb { background: var(--red); border-radius: 10px; }
         
         .menu-item { 
             padding: 18px; margin-bottom: 10px; background: #1a1a1a; border-radius: 8px; 
             display: flex; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer; border: 3px solid transparent;
+            transition: 0.1s;
         }
 
-        /* FOCO */
-        .menu-item.focused, #fs-menu-btn.focused { background: var(--red) !important; transform: scale(1.02); box-shadow: 0 0 15px var(--red); color: white; border-color: transparent; }
+        .menu-item.focused, #fs-menu-btn.focused { 
+            background: var(--red) !important; 
+            transform: scale(1.02); 
+            box-shadow: 0 0 15px var(--red); 
+            color: white; 
+            border-color: transparent; 
+        }
+        
         .fav-star { margin-left: auto; color: gold; font-size: 22px; display: none; }
         .is-fav .fav-star { display: block; }
 
@@ -67,15 +75,15 @@
     <div id="channel-menu">
         <div class="brand">E<span class="x-red">X</span>NA TV</div>
         
-        <div class="category-selector">
-            <button class="cat-btn" onclick="mudarCategoria(-1)">❮</button>
-            <div class="cat-tag" id="cat-label">CARREGANDO...</div>
-            <button class="cat-btn" onclick="mudarCategoria(1)">❯</button>
+        <div class="category-nav">
+            <button class="nav-btn" onclick="mudarCat(-1)">❮</button>
+            <div class="cat-tag" id="cat-label">BRASIL</div>
+            <button class="nav-btn" onclick="mudarCat(1)">❯</button>
         </div>
 
         <div id="fs-menu-btn" onclick="toggleFullscreen()">TELA CHEIA</div>
 
-        <div class="menu-scroll" id="scroll-box">
+        <div class="menu-scroll" id="scroll-container">
             <div id="menu-items"></div>
         </div>
     </div>
@@ -100,32 +108,33 @@
                 const res = await fetch(proxy);
                 const text = await res.text();
                 parsear(text);
-                if (db["FAVORITOS"].length > 0) catIdx = categorias.indexOf("FAVORITOS");
+                catIdx = (db["FAVORITOS"].length > 0) ? categorias.indexOf("FAVORITOS") : 0;
                 iniciarCanal(catIdx, 0);
-            } catch (e) { console.error("Erro ao carregar"); }
+            } catch (e) { console.error("Erro"); }
         }
 
         function parsear(data) {
             const tempDb = { "FAVORITOS": [] };
-            const lines = data.split('\n'); let meta = "";
+            const lines = data.split('\n');
+            let meta = "";
             lines.forEach(line => {
                 if(line.startsWith('#EXTINF')) meta = line;
                 else if(line.startsWith('http')) {
                     const name = meta.split(',')[1]?.trim() || "Canal";
-                    const group = meta.match(/group-title="([^"]+)"/)?.[1]?.toUpperCase() || "BRASIL";
+                    const group = meta.match(/group-title="([^"]+)"/)?.[1]?.toUpperCase() || "GERAL";
                     const url = line.trim();
                     const obj = { name, url };
                     if(!tempDb[group]) tempDb[group] = [];
                     tempDb[group].push(obj);
-                    if(favs.includes(url)) tempDb["FAVORITOS"].push(obj);
+                    if(favs.includes(obj.url)) tempDb["FAVORITOS"].push(obj);
                 }
             });
             db = tempDb;
-            categorias = Object.keys(db).filter(c => db[c].length > 0);
+            categorias = Object.keys(db).filter(c => db[c].length > 0).sort();
             if(db["FAVORITOS"].length > 0) categorias = ["FAVORITOS", ...categorias.filter(c => c !== "FAVORITOS")];
         }
 
-        function mudarCategoria(dir) {
+        function mudarCat(dir) {
             catIdx = (catIdx + dir + categorias.length) % categorias.length;
             canalIdx = 0;
             renderizar();
@@ -135,6 +144,7 @@
         function iniciarCanal(cIdx, chIdx) {
             catIdx = cIdx; canalIdx = chIdx;
             const canal = db[categorias[catIdx]][canalIdx];
+            if(!canal) return;
             video.src = canal.url;
             video.play().catch(() => {});
             fecharMenu();
@@ -146,9 +156,22 @@
             clearTimeout(window.osdT); window.osdT = setTimeout(() => osd.style.display = 'none', 3000);
         }
 
-        function abrirMenu() { document.getElementById('channel-menu').classList.add('open'); menuAberto = true; renderizar(); resetMenuTimer(); }
-        function fecharMenu() { document.getElementById('channel-menu').classList.remove('open'); menuAberto = false; }
-        function resetMenuTimer() { clearTimeout(menuTimeout); if (menuAberto) menuTimeout = setTimeout(fecharMenu, 8000); }
+        function abrirMenu() { 
+            document.getElementById('channel-menu').classList.add('open'); 
+            menuAberto = true; 
+            renderizar(); 
+            resetMenuTimer(); 
+        }
+
+        function fecharMenu() { 
+            document.getElementById('channel-menu').classList.remove('open'); 
+            menuAberto = false; 
+        }
+
+        function resetMenuTimer() { 
+            clearTimeout(menuTimeout); 
+            if (menuAberto) menuTimeout = setTimeout(fecharMenu, 8000); 
+        }
 
         function renderizar() {
             const container = document.getElementById('menu-items');
@@ -161,12 +184,28 @@
                 item.className = "menu-item" + (favs.includes(ch.url) ? " is-fav" : "");
                 if (i === canalIdx) item.classList.add('focused');
                 item.innerHTML = `<span>${ch.name}</span><span class="fav-star">★</span>`;
-                
                 item.onclick = (e) => { e.stopPropagation(); iniciarCanal(catIdx, i); };
+                
+                // Touch Longo Celular
+                let timer;
+                item.ontouchstart = () => { timer = setTimeout(() => toggleFavManual(ch), 800); };
+                item.ontouchend = () => clearTimeout(timer);
+
                 container.appendChild(item);
             });
-            const active = document.querySelector('.menu-item.focused');
-            if (active && menuAberto) active.scrollIntoView({ block: "center", behavior: "smooth" });
+
+            // CORREÇÃO DO SCROLL PARA TV
+            setTimeout(() => {
+                const active = document.querySelector('.menu-item.focused');
+                if (active) active.scrollIntoView({ block: "center", behavior: "smooth" });
+            }, 50);
+        }
+
+        function toggleFavManual(canal) {
+            if(favs.includes(canal.url)) favs = favs.filter(f => f !== canal.url);
+            else favs.push(canal.url);
+            localStorage.setItem('exna_favs', JSON.stringify(favs));
+            carregarSistema(); 
         }
 
         function toggleFullscreen() {
@@ -178,15 +217,27 @@
         document.addEventListener('keydown', (e) => {
             resetMenuTimer();
             if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Backspace"].includes(e.key)) e.preventDefault();
+            
+            let totalCanais = db[categorias[catIdx]].length;
+
             if(!menuAberto) {
                 if(e.key === "Enter" || e.key === "ArrowLeft") abrirMenu();
-                if(e.key === "ArrowUp") iniciarCanal(catIdx, (canalIdx - 1 + db[categorias[catIdx]].length) % db[categorias[catIdx]].length);
-                if(e.key === "ArrowDown") iniciarCanal(catIdx, (canalIdx + 1) % db[categorias[catIdx]].length);
+                if(e.key === "ArrowUp") iniciarCanal(catIdx, (canalIdx - 1 + totalCanais) % totalCanais);
+                if(e.key === "ArrowDown") iniciarCanal(catIdx, (canalIdx + 1) % totalCanais);
             } else {
-                if(e.key === "ArrowUp") { if (canalIdx > -1) canalIdx--; renderizar(); }
-                if(e.key === "ArrowDown") { if (canalIdx < db[categorias[catIdx]].length - 1) canalIdx++; renderizar(); }
-                if(e.key === "ArrowLeft") mudarCategoria(-1);
-                if(e.key === "ArrowRight") mudarCategoria(1);
+                // Navegação na Lista
+                if(e.key === "ArrowUp") { 
+                    canalIdx = (canalIdx - 1 < -1) ? totalCanais - 1 : canalIdx - 1;
+                    renderizar(); 
+                }
+                if(e.key === "ArrowDown") { 
+                    canalIdx = (canalIdx + 1 >= totalCanais) ? -1 : canalIdx + 1;
+                    renderizar(); 
+                }
+                // Categorias
+                if(e.key === "ArrowLeft") mudarCat(-1);
+                if(e.key === "ArrowRight") mudarCat(1);
+                
                 if(e.key === "Enter") canalIdx === -1 ? toggleFullscreen() : iniciarCanal(catIdx, canalIdx);
                 if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
             }
