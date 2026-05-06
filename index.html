@@ -97,15 +97,7 @@
 
         async function carregarSistema() {
             mostrarOSD("BUSCANDO CANAIS...");
-            
-            // Lista de Proxies para tentar um por um caso falhe no PC/TV
-            const proxies = [
-                "", // Tentativa direta (funciona em alguns dispositivos)
-                "https://api.allorigins.win/raw?url=", 
-                "https://corsproxy.io/?",
-                "https://thingproxy.freeboard.io/fetch/"
-            ];
-
+            const proxies = ["", "https://api.allorigins.win/raw?url=", "https://corsproxy.io/?"];
             for (let p of proxies) {
                 try {
                     const res = await fetch(p + LISTA_BR);
@@ -115,12 +107,11 @@
                             parsear(text);
                             catIdx = (db["FAVORITOS"].length > 0) ? categorias.indexOf("FAVORITOS") : 0;
                             iniciarCanal(catIdx, 0);
-                            return; // Sucesso!
+                            return;
                         }
                     }
-                } catch (e) { console.warn("Proxy falhou, tentando próximo..."); }
+                } catch (e) { console.warn("Proxy falhou..."); }
             }
-            mostrarOSD("ERRO AO CARREGAR LISTA");
         }
 
         function parsear(data) {
@@ -200,12 +191,12 @@
                 // Toque/Clique rápido
                 item.onclick = (e) => { e.stopPropagation(); iniciarCanal(catIdx, i); };
                 
-                // Toque Longo / Botão Direito (Favoritar)
+                // Toque Longo (Celular)
                 let timer;
-                item.onmousedown = () => { timer = setTimeout(() => toggleFavManual(ch), 800); };
-                item.onmouseup = () => clearTimeout(timer);
                 item.ontouchstart = () => { timer = setTimeout(() => toggleFavManual(ch), 800); };
                 item.ontouchend = () => clearTimeout(timer);
+                
+                // Botão Direito (Mouse)
                 item.oncontextmenu = (e) => { e.preventDefault(); toggleFavManual(ch); };
 
                 container.appendChild(item);
@@ -218,11 +209,21 @@
         }
 
         function toggleFavManual(canal) {
+            if(!canal) return;
             if(favs.includes(canal.url)) favs = favs.filter(f => f !== canal.url);
             else favs.push(canal.url);
             localStorage.setItem('exna_favs', JSON.stringify(favs));
-            parsear(""); // Atualiza DB interno
-            carregarSistema(); 
+            
+            // Recarrega Favoritos no DB interno
+            db["FAVORITOS"] = [];
+            Object.keys(db).forEach(cat => {
+                if(cat !== "FAVORITOS") {
+                    db[cat].forEach(c => { if(favs.includes(c.url)) db["FAVORITOS"].push(c); });
+                }
+            });
+            if(db["FAVORITOS"].length > 0 && !categorias.includes("FAVORITOS")) categorias.unshift("FAVORITOS");
+            
+            renderizar();
             mostrarOSD("FAVORITOS ATUALIZADOS");
         }
 
@@ -252,7 +253,12 @@
                     renderizar(); 
                 }
                 if(e.key === "ArrowLeft") mudarCat(-1);
-                if(e.key === "ArrowRight") mudarCat(1);
+                
+                // COMANDO PARA FAVORITAR NO CONTROLE (SETA DIREITA)
+                if(e.key === "ArrowRight") {
+                    if(canalIdx !== -1) toggleFavManual(db[categorias[catIdx]][canalIdx]);
+                    else mudarCat(1);
+                }
                 
                 if(e.key === "Enter") canalIdx === -1 ? toggleFullscreen() : iniciarCanal(catIdx, canalIdx);
                 if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
