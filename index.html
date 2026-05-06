@@ -14,7 +14,7 @@
             font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; 
         }
 
-        /* PLAYER - Clicável para abrir menu no celular */
+        /* PLAYER - CLICÁVEL PARA CELULAR */
         #player-container { position: fixed; inset: 0; z-index: 1; background: #000; cursor: pointer; }
         .video-js { width: 100% !important; height: 100% !important; }
 
@@ -37,13 +37,14 @@
         .x-red { color: var(--red); }
         .cat-tag { color: var(--red); font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
 
-        /* BOTÕES E ITENS SEM BORDAS BRANCAS */
+        /* BOTÃO TELA CHEIA - SEM BORDA BRANCA */
         #fs-menu-btn {
             padding: 15px; margin-bottom: 20px; background: #222; border-radius: 8px;
             border: 2px solid transparent; color: white; font-weight: bold;
             text-align: center; cursor: pointer; transition: 0.2s;
         }
 
+        /* LISTA */
         .menu-scroll { flex-grow: 1; overflow-y: auto; position: relative; scroll-behavior: smooth; }
         .menu-scroll::-webkit-scrollbar { display: none; }
         #menu-items { transition: transform 0.3s ease; }
@@ -54,19 +55,19 @@
             display: flex; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer;
         }
 
-        /* EFEITO DE FOCO (TV E CELULAR) - SEM BORDAS BRANCAS */
+        /* FOCO UNITV STYLE - SEM BORDAS BRANCAS */
         .menu-item.focused, #fs-menu-btn.focused { 
             background: var(--red) !important; 
             border-color: transparent !important; 
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(229, 9, 20, 0.8);
+            box-shadow: 0 0 25px rgba(229, 9, 20, 0.8);
             color: white !important;
         }
         
         .fav-star { margin-left: auto; color: gold; font-size: 22px; display: none; }
         .is-fav .fav-star { display: block; }
 
-        /* OSD MENSAGEM */
+        /* OSD */
         #osd { 
             position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.85); padding: 15px 45px; border-radius: 50px;
@@ -104,9 +105,12 @@
 
     <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
     <script>
-        const player = videojs('vid');
+        // Configuração do Player para evitar tela roxa (Força Hardware da TV)
+        const player = videojs('vid', {
+            html5: { vhs: { overrideNative: false }, nativeVideoTracks: true, nativeAudioTracks: true }
+        });
+
         const LISTA_BR = "https://iptv-org.github.io/iptv/countries/br.m3u";
-        
         let db = { "FAVORITOS": [] };
         let categorias = [];
         let catIdx = 0;
@@ -127,24 +131,23 @@
         }
 
         async function carregarSistema() {
+            mostrarOSD("CARREGANDO...");
             try {
-                // Proxy para liberar imagem na TV
-                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR);
-                const res = await fetch(proxyUrl);
+                // Tenta carregar direto primeiro para ser rápido
+                const res = await fetch(LISTA_BR);
                 const text = await res.text();
                 parsearLista(text);
-                
-                if (db["FAVORITOS"].length > 0) {
-                    catIdx = categorias.indexOf("FAVORITOS");
-                }
-                iniciarCanal(catIdx, 0);
-            } catch (e) { 
-                console.error("Erro na lista");
-                const resManual = await fetch(LISTA_BR);
-                const textManual = await resManual.text();
-                parsearLista(textManual);
-                iniciarCanal(0, 0);
+            } catch (e) {
+                // Se falhar (CORS), usa o Proxy
+                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR);
+                const resP = await fetch(proxyUrl);
+                const textP = await resP.text();
+                parsearLista(textP);
             }
+
+            // Abre favoritos por padrão se existirem
+            if (db["FAVORITOS"].length > 0) catIdx = categorias.indexOf("FAVORITOS");
+            iniciarCanal(catIdx, 0);
         }
 
         function parsearLista(data) {
@@ -174,7 +177,7 @@
             canalIdx = chIdx;
             const canal = db[categorias[catIdx]][canalIdx];
             player.src({ type: 'application/x-mpegURL', src: canal.url });
-            player.play();
+            player.play().catch(() => { mostrarOSD("ERRO NO SINAL"); });
             fecharMenu();
             mostrarOSD(canal.name);
         }
@@ -187,17 +190,17 @@
             window.osdTimer = setTimeout(() => osd.style.display = 'none', 3000);
         }
 
-        function fecharMenu() {
-            document.getElementById('channel-menu').classList.remove('open');
-            menuAberto = false;
-            clearTimeout(menuTimeout);
-        }
-
         function abrirMenu() {
             document.getElementById('channel-menu').classList.add('open');
             menuAberto = true;
             renderizar();
             resetMenuTimer();
+        }
+
+        function fecharMenu() {
+            document.getElementById('channel-menu').classList.remove('open');
+            menuAberto = false;
+            clearTimeout(menuTimeout);
         }
 
         function renderizar() {
@@ -214,20 +217,15 @@
                 if (i === canalIdx) item.classList.add('focused');
                 item.innerHTML = `<span>${ch.name}</span><span class="fav-star">★</span>`;
                 
-                // Suporte ao toque no celular
-                item.onclick = (e) => {
-                    e.stopPropagation();
-                    iniciarCanal(catIdx, i);
-                };
+                // Touch para celular
+                item.onclick = (e) => { e.stopPropagation(); iniciarCanal(catIdx, i); };
                 
                 container.appendChild(item);
             });
-            ajustarPosicao();
-        }
-
-        function ajustarPosicao() {
-            const item = document.querySelector('.menu-item.focused');
-            if (item) item.scrollIntoView({ block: "center", behavior: "smooth" });
+            if (canalIdx !== -1) {
+                const active = document.querySelector('.menu-item.focused');
+                if (active) active.scrollIntoView({ block: "center", behavior: "smooth" });
+            }
         }
 
         function toggleFavorito() {
@@ -252,9 +250,7 @@
 
         function resetMenuTimer() {
             clearTimeout(menuTimeout);
-            if (menuAberto) {
-                menuTimeout = setTimeout(fecharMenu, 7000);
-            }
+            if (menuAberto) menuTimeout = setTimeout(fecharMenu, 8000); // Some em 8s
         }
 
         document.addEventListener('keydown', (e) => {
@@ -270,10 +266,7 @@
                 if(e.key === "ArrowDown") { if (canalIdx < db[categorias[catIdx]].length - 1) canalIdx++; renderizar(); }
                 if(e.key === "ArrowLeft") { catIdx = (catIdx + 1) % categorias.length; canalIdx = 0; renderizar(); }
                 if(e.key === "ArrowRight") toggleFavorito();
-                if(e.key === "Enter") {
-                    if (canalIdx === -1) toggleFullscreen();
-                    else iniciarCanal(catIdx, canalIdx);
-                }
+                if(e.key === "Enter") canalIdx === -1 ? toggleFullscreen() : iniciarCanal(catIdx, canalIdx);
                 if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
             }
         });
