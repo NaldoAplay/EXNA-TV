@@ -7,27 +7,27 @@
     <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
     <style>
         :root { --red: #E50914; --bg: #000; --panel: rgba(10, 10, 10, 0.98); }
-        * { box-sizing: border-box; outline: none; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body, html { 
             margin: 0; padding: 0; background: #000; color: white; 
             font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; 
         }
 
-        /* PLAYER */
-        #player-container { position: fixed; inset: 0; z-index: 1; background: #000; }
+        /* PLAYER - Clicável para abrir menu no celular */
+        #player-container { position: fixed; inset: 0; z-index: 1; background: #000; cursor: pointer; }
         .video-js { width: 100% !important; height: 100% !important; }
 
         /* RELÓGIO SUPERIOR */
         #top-clock {
             position: fixed; top: 20px; right: 30px; z-index: 2000;
             font-size: 22px; font-weight: bold; color: rgba(255,255,255,0.8);
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8); pointer-events: none;
         }
 
-        /* MENU LATERAL */
+        /* MENU LATERAL RESPONSIVO */
         #channel-menu { 
-            position: fixed; left: -450px; top: 0; width: 420px; height: 100%; 
+            position: fixed; left: -450px; top: 0; width: 85%; max-width: 420px; height: 100%; 
             background: var(--panel); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 30px; border-right: 4px solid var(--red); display: flex; flex-direction: column;
         }
@@ -37,32 +37,36 @@
         .x-red { color: var(--red); }
         .cat-tag { color: var(--red); font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
 
-        /* BOTÃO TELA CHEIA NO MENU */
+        /* BOTÕES E ITENS SEM BORDAS BRANCAS */
         #fs-menu-btn {
             padding: 15px; margin-bottom: 20px; background: #222; border-radius: 8px;
-            border: 3px solid transparent; color: white; font-weight: bold;
+            border: 2px solid transparent; color: white; font-weight: bold;
             text-align: center; cursor: pointer; transition: 0.2s;
         }
-        #fs-menu-btn.focused { background: white; color: black; border-color: var(--red); transform: scale(1.03); }
 
-        /* LISTA */
-        .menu-scroll { flex-grow: 1; overflow-y: hidden; position: relative; }
+        .menu-scroll { flex-grow: 1; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        .menu-scroll::-webkit-scrollbar { display: none; }
         #menu-items { transition: transform 0.3s ease; }
 
         .menu-item { 
             padding: 18px; margin-bottom: 10px; background: #1a1a1a; 
-            border-radius: 8px; border: 3px solid transparent; 
-            display: flex; align-items: center; font-size: 18px; font-weight: 600;
+            border-radius: 8px; border: 2px solid transparent; 
+            display: flex; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer;
         }
 
-        .menu-item.focused { 
-            background: var(--red); border-color: #fff; transform: scale(1.03);
+        /* EFEITO DE FOCO (TV E CELULAR) - SEM BORDAS BRANCAS */
+        .menu-item.focused, #fs-menu-btn.focused { 
+            background: var(--red) !important; 
+            border-color: transparent !important; 
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.8);
+            color: white !important;
         }
         
         .fav-star { margin-left: auto; color: gold; font-size: 22px; display: none; }
         .is-fav .fav-star { display: block; }
 
-        /* OSD */
+        /* OSD MENSAGEM */
         #osd { 
             position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.85); padding: 15px 45px; border-radius: 50px;
@@ -70,28 +74,14 @@
         }
 
         .footer-brand { position: fixed; bottom: 10px; right: 20px; font-size: 10px; color: #333; z-index: 5; }
-        /* Remove a borda branca e mantém apenas o brilho e o fundo vermelho */
-.menu-item.focused { 
-    background: var(--red) !important; 
-    border-color: transparent !important; /* Apaga a barrinha branca */
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(229, 9, 20, 0.8); /* Mantém o brilho vermelho */
-}
-
-/* Garante que o botão de tela cheia também não tenha borda branca */
-#fs-menu-btn.focused {
-    background: var(--red) !important;
-    color: white !important;
-    border-color: transparent !important;
-}
     </style>
 </head>
-<body>
+<body onclick="resetMenuTimer()">
 
     <div id="top-clock">00:00</div>
 
-    <div id="player-container">
-        <video id="vid" class="video-js vjs-default-skin" autoplay></video>
+    <div id="player-container" onclick="abrirMenu()">
+        <video id="vid" class="video-js vjs-default-skin" autoplay playsinline></video>
         <div id="osd">Canal</div>
     </div>
 
@@ -120,8 +110,9 @@
         let db = { "FAVORITOS": [] };
         let categorias = [];
         let catIdx = 0;
-        let canalIdx = 0; // -1 indica que o foco está no botão Fullscreen
+        let canalIdx = 0;
         let menuAberto = false;
+        let menuTimeout;
         let favs = JSON.parse(localStorage.getItem('exna_favs') || "[]");
 
         window.onload = () => {
@@ -132,38 +123,29 @@
 
         function updateClock() {
             const now = new Date();
-            const time = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('top-clock').innerText = time;
+            document.getElementById('top-clock').innerText = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Substitua a sua função carregarSistema por esta:
-async function carregarSistema() {
-    try {
-        // Usando o Proxy para evitar a tela roxa/preta e liberar o sinal na TV
-        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR);
-        
-        const res = await fetch(proxyUrl);
-        const text = await res.text();
-        parsearLista(text);
-        
-        // Define a categoria inicial (Favoritos ou a primeira da lista)
-        if (db["FAVORITOS"].length > 0) {
-            catIdx = categorias.indexOf("FAVORITOS");
-        } else {
-            catIdx = 0;
+        async function carregarSistema() {
+            try {
+                // Proxy para liberar imagem na TV
+                const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR);
+                const res = await fetch(proxyUrl);
+                const text = await res.text();
+                parsearLista(text);
+                
+                if (db["FAVORITOS"].length > 0) {
+                    catIdx = categorias.indexOf("FAVORITOS");
+                }
+                iniciarCanal(catIdx, 0);
+            } catch (e) { 
+                console.error("Erro na lista");
+                const resManual = await fetch(LISTA_BR);
+                const textManual = await resManual.text();
+                parsearLista(textManual);
+                iniciarCanal(0, 0);
+            }
         }
-        
-        // Inicia o canal com o sinal já liberado
-        iniciarCanal(catIdx, 0);
-    } catch (e) { 
-        console.error("Erro na lista ou bloqueio de sinal"); 
-        // Tentativa de carregamento direto caso o proxy falhe
-        const resManual = await fetch(LISTA_BR);
-        const textManual = await resManual.text();
-        parsearLista(textManual);
-        iniciarCanal(0, 0);
-    }
-}
 
         function parsearLista(data) {
             db = { "FAVORITOS": [] };
@@ -208,12 +190,14 @@ async function carregarSistema() {
         function fecharMenu() {
             document.getElementById('channel-menu').classList.remove('open');
             menuAberto = false;
+            clearTimeout(menuTimeout);
         }
 
         function abrirMenu() {
             document.getElementById('channel-menu').classList.add('open');
             menuAberto = true;
             renderizar();
+            resetMenuTimer();
         }
 
         function renderizar() {
@@ -222,27 +206,28 @@ async function carregarSistema() {
             document.getElementById('cat-label').innerText = categorias[catIdx];
             container.innerHTML = "";
             
-            // Remove foco do botão Fullscreen
-            fsBtn.classList.remove('focused');
-
-            if (canalIdx === -1) {
-                fsBtn.classList.add('focused');
-            }
+            fsBtn.classList.toggle('focused', canalIdx === -1);
 
             db[categorias[catIdx]].forEach((ch, i) => {
                 const item = document.createElement('div');
                 item.className = "menu-item" + (favs.includes(ch.url) ? " is-fav" : "");
                 if (i === canalIdx) item.classList.add('focused');
                 item.innerHTML = `<span>${ch.name}</span><span class="fav-star">★</span>`;
+                
+                // Suporte ao toque no celular
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    iniciarCanal(catIdx, i);
+                };
+                
                 container.appendChild(item);
             });
             ajustarPosicao();
         }
 
         function ajustarPosicao() {
-            const container = document.getElementById('menu-items');
-            const offset = (canalIdx < 0) ? 0 : canalIdx * 66;
-            container.style.transform = `translateY(-${offset}px)`;
+            const item = document.querySelector('.menu-item.focused');
+            if (item) item.scrollIntoView({ block: "center", behavior: "smooth" });
         }
 
         function toggleFavorito() {
@@ -260,14 +245,20 @@ async function carregarSistema() {
         }
 
         function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+            fecharMenu();
+        }
+
+        function resetMenuTimer() {
+            clearTimeout(menuTimeout);
+            if (menuAberto) {
+                menuTimeout = setTimeout(fecharMenu, 7000);
             }
         }
 
         document.addEventListener('keydown', (e) => {
+            resetMenuTimer();
             if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Backspace"].includes(e.key)) e.preventDefault();
 
             if(!menuAberto) {
@@ -275,14 +266,8 @@ async function carregarSistema() {
                 if(e.key === "ArrowUp") iniciarCanal(catIdx, (canalIdx - 1 + db[categorias[catIdx]].length) % db[categorias[catIdx]].length);
                 if(e.key === "ArrowDown") iniciarCanal(catIdx, (canalIdx + 1) % db[categorias[catIdx]].length);
             } else {
-                if(e.key === "ArrowUp") { 
-                    if (canalIdx > -1) canalIdx--; 
-                    renderizar(); 
-                }
-                if(e.key === "ArrowDown") { 
-                    if (canalIdx < db[categorias[catIdx]].length - 1) canalIdx++; 
-                    renderizar(); 
-                }
+                if(e.key === "ArrowUp") { if (canalIdx > -1) canalIdx--; renderizar(); }
+                if(e.key === "ArrowDown") { if (canalIdx < db[categorias[catIdx]].length - 1) canalIdx++; renderizar(); }
                 if(e.key === "ArrowLeft") { catIdx = (catIdx + 1) % categorias.length; canalIdx = 0; renderizar(); }
                 if(e.key === "ArrowRight") toggleFavorito();
                 if(e.key === "Enter") {
@@ -292,32 +277,6 @@ async function carregarSistema() {
                 if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
             }
         });
-        let menuTimeout;
-
-// Função para resetar o tempo sempre que você apertar uma tecla
-function resetMenuTimer() {
-    clearTimeout(menuTimeout);
-    if (menuAberto) {
-        menuTimeout = setTimeout(() => {
-            fecharMenu();
-        }, 7000); // 7 segundos e a lista some
-    }
-}
-
-// Atualize sua função de abrirMenu para iniciar o cronômetro
-function abrirMenu() {
-    document.getElementById('channel-menu').classList.add('open');
-    menuAberto = true;
-    renderizar();
-    resetMenuTimer(); // Inicia a contagem ao abrir
-}
-
-// No seu document.addEventListener('keydown'), adicione esta linha no início:
-document.addEventListener('keydown', (e) => {
-    resetMenuTimer(); // Resetar o tempo toda vez que apertar qualquer botão no controle
-    
-    // ... resto do seu código de navegação ...
-});
     </script>
 </body>
 </html>
