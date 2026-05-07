@@ -3,266 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXNA TV | PRO</title>
+    <title>EXNA TV PREMIUM</title>
     <style>
-        :root { --red: #E50914; --bg: #000; --panel: rgba(10, 10, 10, 0.98); }
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        :root { --gold: #D4AF37; --glass: rgba(15, 15, 15, 0.9); }
+        * { box-sizing: border-box; outline: none; }
         body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
 
-        #video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; display: flex; align-items: center; justify-content: center; }
-        video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        /* PLAYER */
+        #video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; }
+        video { width: 100%; height: 100%; object-fit: contain; }
 
-        #top-clock { position: fixed; top: 20px; right: 30px; z-index: 2000; font-size: 22px; font-weight: bold; text-shadow: 2px 2px 5px #000; pointer-events: none; }
-
-        #channel-menu { 
-            position: fixed; left: -450px; top: 0; width: 85%; max-width: 420px; height: 100%; 
-            background: var(--panel); z-index: 1000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 30px; border-right: 4px solid var(--red); display: flex; flex-direction: column;
+        /* HEADER SOBRE O VÍDEO */
+        #top-bar { 
+            position: fixed; top: 0; left: 0; width: 100%; padding: 30px 50px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            z-index: 5; pointer-events: none;
         }
-        #channel-menu.open { left: 0; }
-        .brand { font-size: 35px; font-weight: 900; margin-bottom: 5px; }
-        .x-red { color: var(--red); }
+        .brand-text { font-size: 24px; font-weight: 900; letter-spacing: 2px; transition: 1s; }
+        .gold-txt { color: var(--gold); }
+        #clock { font-size: 26px; font-weight: 300; }
 
-        .category-nav {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 15px; background: #222; border-radius: 8px; padding: 5px;
+        /* MENU LATERAL VIDRO FOSCO */
+        #side-menu { 
+            position: fixed; left: -420px; top: 0; width: 400px; height: 100%; 
+            background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            z-index: 100; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 0; border-right: 1px solid rgba(212, 175, 55, 0.2);
+            display: flex; flex-direction: column;
         }
-        .nav-btn { background: var(--red); color: white; border: none; padding: 10px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .cat-tag { color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; flex: 1; text-align: center; overflow: hidden; white-space: nowrap; }
+        #side-menu.open { left: 0; }
 
-        #fs-menu-btn { padding: 15px; margin-bottom: 20px; background: #333; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; text-align: center; }
+        /* MARCA NO TOPO DA ABA */
+        #menu-header { padding: 30px 40px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); margin-bottom: 20px; }
+
+        .cat-selector { display: flex; padding: 0 40px; gap: 25px; margin-bottom: 30px; }
+        .cat-tab { font-size: 14px; font-weight: bold; opacity: 0.3; cursor: pointer; color: white; }
+        .cat-tab.active { opacity: 1; color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
+
+        .menu-scroll { flex-grow: 1; overflow-y: auto; padding: 0 25px; }
+        .menu-scroll::-webkit-scrollbar { width: 0; }
+
+        /* ITEM DA LISTA */
+        .item { 
+            padding: 12px 15px; margin-bottom: 10px; border-radius: 10px;
+            display: flex; align-items: center; gap: 15px;
+            background: rgba(255,255,255,0.03); border: 1px solid transparent;
+        }
+        .item.focused { background: rgba(212, 175, 55, 0.15); border-color: var(--gold); transform: scale(1.02); }
+
+        /* LOGO OU MARCA EXNA TV */
+        .logo-container { width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border-radius: 4px; }
+        .chan-logo { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .menu-scroll { flex-grow: 1; overflow-y: auto; scroll-behavior: smooth; padding-right: 5px; }
-        .menu-scroll::-webkit-scrollbar { width: 5px; }
-        .menu-scroll::-webkit-scrollbar-thumb { background: var(--red); border-radius: 10px; }
-        
-        .menu-item { 
-            padding: 18px; margin-bottom: 10px; background: #1a1a1a; border-radius: 8px; 
-            display: flex; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer; border: 3px solid transparent;
-        }
+        /* Marca EXNA TV que aparece quando NÃO tem logo */
+        .exna-placeholder { font-size: 10px; font-weight: 900; text-align: center; line-height: 1.1; }
 
-        .menu-item.focused, #fs-menu-btn.focused { 
-            background: var(--red) !important; 
-            transform: scale(1.02); 
-            box-shadow: 0 0 15px var(--red); 
-            color: white; 
-            border-color: transparent; 
-        }
-        
-        .fav-star { margin-left: auto; color: gold; font-size: 22px; display: none; }
-        .is-fav .fav-star { display: block; }
+        .item span.chan-name { font-size: 16px; font-weight: 500; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .star { display: none; color: var(--gold); font-size: 18px; }
+        .item.is-fav .star { display: block; }
 
-        #osd { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 15px 45px; border-radius: 50px; border: 2px solid var(--red); z-index: 2000; display: none; font-weight: bold; }
-        .footer-brand { position: fixed; bottom: 10px; right: 20px; font-size: 10px; color: #333; z-index: 5; }
+        #osd { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.9); padding: 15px 40px; border-radius: 8px; border-bottom: 3px solid var(--gold); z-index: 200; display: none; font-weight: bold; }
     </style>
 </head>
 <body onclick="resetMenuTimer()">
 
-    <div id="top-clock">00:00</div>
-
-    <div id="video-wrapper" onclick="abrirMenu()">
-        <video id="main-video" autoplay playsinline></video>
-        <div id="osd">Canal</div>
+    <div id="top-bar">
+        <div id="brand-logo" class="brand-text">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></div>
+        <div id="clock">00:00</div>
     </div>
 
-    <div id="channel-menu">
-        <div class="brand">E<span class="x-red">X</span>NA TV</div>
-        
-        <div class="category-nav">
-            <button class="nav-btn" onclick="mudarCat(-1)">❮</button>
-            <div class="cat-tag" id="cat-label">CARREGANDO...</div>
-            <button class="nav-btn" onclick="mudarCat(1)">❯</button>
-        </div>
-
-        <div id="fs-menu-btn" onclick="toggleFullscreen()">TELA CHEIA</div>
-
-        <div class="menu-scroll" id="scroll-container">
-            <div id="menu-items"></div>
-        </div>
+    <div id="video-wrapper">
+        <video id="player" autoplay playsinline></video>
     </div>
 
-    <div class="footer-brand">&COPY; 2026 - EXNA TV</div>
+    <div id="side-menu">
+        <div id="menu-header">
+            <div class="brand-text">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></div>
+        </div>
+        <div class="cat-selector">
+            <div id="tab-0" class="cat-tab active" onclick="mudarCat(0)">FAVORITOS</div>
+            <div id="tab-1" class="cat-tab" onclick="mudarCat(1)">TODOS</div>
+        </div>
+        <div class="menu-scroll" id="menu-list"></div>
+    </div>
+
+    <div id="osd">Canal</div>
 
     <script>
-        const video = document.getElementById('main-video');
+        const video = document.getElementById('player');
         const LISTA_BR = "https://iptv-org.github.io/iptv/countries/br.m3u";
-        let db = { "FAVORITOS": [] }, categorias = [], catIdx = 0, canalIdx = 0, menuAberto = false, menuTimeout;
+        let db = { "FAVORITOS": [], "TODOS": [] }, categorias = ["FAVORITOS", "TODOS"];
+        let catIdx = 0, canalIdx = 0, menuAberto = false, pressTimer;
         let favs = JSON.parse(localStorage.getItem('exna_favs') || "[]");
 
-        window.onload = () => { carregarSistema(); setInterval(updateClock, 1000); };
+        window.onload = () => {
+            carregarSistema();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setTimeout(() => { document.getElementById('brand-logo').style.opacity = "0"; }, 8000);
+        };
 
         function updateClock() {
-            document.getElementById('top-clock').innerText = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
         async function carregarSistema() {
-            mostrarOSD("BUSCANDO CANAIS...");
-            const proxies = ["", "https://api.allorigins.win/raw?url=", "https://corsproxy.io/?"];
-            for (let p of proxies) {
-                try {
-                    const res = await fetch(p + LISTA_BR);
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text.includes("#EXTM3U")) {
-                            parsear(text);
-                            catIdx = (db["FAVORITOS"].length > 0) ? categorias.indexOf("FAVORITOS") : 0;
-                            iniciarCanal(catIdx, 0);
-                            return;
-                        }
-                    }
-                } catch (e) { console.warn("Proxy falhou..."); }
-            }
+            try {
+                const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR));
+                const data = await res.text();
+                parsear(data);
+                catIdx = (db["FAVORITOS"].length > 0) ? 0 : 1;
+                iniciarCanal(catIdx, 0);
+            } catch (e) { mostrarOSD("ERRO NA LISTA"); }
         }
 
         function parsear(data) {
-            const tempDb = { "FAVORITOS": [] };
-            const lines = data.split('\n');
-            let meta = "";
+            const lines = data.split('\n'); let meta = "";
             lines.forEach(line => {
                 if(line.startsWith('#EXTINF')) meta = line;
                 else if(line.startsWith('http')) {
                     const name = meta.split(',')[1]?.trim() || "Canal";
-                    const group = meta.match(/group-title="([^"]+)"/)?.[1]?.toUpperCase() || "GERAL";
+                    const logo = meta.match(/tvg-logo="([^"]+)"/)?.[1] || null;
                     const url = line.trim();
-                    const obj = { name, url };
-                    if(!tempDb[group]) tempDb[group] = [];
-                    tempDb[group].push(obj);
-                    if(favs.includes(obj.url)) tempDb["FAVORITOS"].push(obj);
+                    const obj = { name, url, logo };
+                    db["TODOS"].push(obj);
+                    if(favs.includes(url)) db["FAVORITOS"].push(obj);
                 }
             });
-            db = tempDb;
-            categorias = Object.keys(db).filter(c => db[c].length > 0).sort();
-            if(db["FAVORITOS"].length > 0) {
-                categorias = ["FAVORITOS", ...categorias.filter(c => c !== "FAVORITOS")];
-            }
         }
 
-        function mudarCat(dir) {
-            catIdx = (catIdx + dir + categorias.length) % categorias.length;
-            canalIdx = 0;
-            renderizar();
-            resetMenuTimer();
+        function renderizar() {
+            const list = document.getElementById('menu-list');
+            list.innerHTML = "";
+            document.querySelectorAll('.cat-tab').forEach((t, i) => t.classList.toggle('active', i === catIdx));
+
+            db[categorias[catIdx]].forEach((ch, i) => {
+                const item = document.createElement('div');
+                item.className = "item" + (favs.includes(ch.url) ? " is-fav" : "");
+                if (i === canalIdx) item.classList.add('focused');
+
+                // Lógica da Logo: Se não tem 'ch.logo', coloca a marca EXNA TV dourada
+                const logoHtml = ch.logo 
+                    ? `<img class="chan-logo" src="${ch.logo}" onerror="this.parentElement.innerHTML='<div class=\'exna-placeholder\'>E<span class=\'gold-txt\'>X</span>NA<br><span class=\'gold-txt\'>TV</span></div>'">`
+                    : `<div class="exna-placeholder">E<span class="gold-txt">X</span>NA<br><span class="gold-txt">TV</span></div>`;
+
+                item.innerHTML = `
+                    <div class="logo-container">${logoHtml}</div>
+                    <span class="chan-name">${ch.name}</span>
+                    <span class="star">★</span>
+                `;
+                item.onclick = () => iniciarCanal(catIdx, i);
+                list.appendChild(item);
+            });
+            const f = document.querySelector('.item.focused');
+            if (f) f.scrollIntoView({ block: "center" });
         }
 
-        function iniciarCanal(cIdx, chIdx) {
-            catIdx = cIdx; canalIdx = chIdx;
+        function mudarCat(idx) { catIdx = idx; canalIdx = 0; renderizar(); }
+
+        function iniciarCanal(cI, chI) {
+            catIdx = cI; canalIdx = chI;
             const canal = db[categorias[catIdx]][canalIdx];
             if(!canal) return;
             video.src = canal.url;
-            video.play().catch(() => {});
+            video.play();
             fecharMenu();
             mostrarOSD(canal.name);
         }
 
-        function mostrarOSD(t) {
-            const osd = document.getElementById('osd'); osd.innerText = t; osd.style.display = 'block';
-            clearTimeout(window.osdT); window.osdT = setTimeout(() => osd.style.display = 'none', 3000);
-        }
-
-        function abrirMenu() { 
-            document.getElementById('channel-menu').classList.add('open'); 
-            menuAberto = true; 
-            renderizar(); 
-            resetMenuTimer(); 
-        }
-
-        function fecharMenu() { 
-            document.getElementById('channel-menu').classList.remove('open'); 
-            menuAberto = false; 
-        }
-
-        function resetMenuTimer() { 
-            clearTimeout(menuTimeout); 
-            if (menuAberto) menuTimeout = setTimeout(fecharMenu, 8000); 
-        }
-
-        function renderizar() {
-            const container = document.getElementById('menu-items');
-            document.getElementById('cat-label').innerText = categorias[catIdx];
-            container.innerHTML = "";
-            document.getElementById('fs-menu-btn').classList.toggle('focused', canalIdx === -1);
-
-            db[categorias[catIdx]].forEach((ch, i) => {
-                const item = document.createElement('div');
-                item.className = "menu-item" + (favs.includes(ch.url) ? " is-fav" : "");
-                if (i === canalIdx) item.classList.add('focused');
-                item.innerHTML = `<span>${ch.name}</span><span class="fav-star">★</span>`;
-                
-                // Toque/Clique rápido
-                item.onclick = (e) => { e.stopPropagation(); iniciarCanal(catIdx, i); };
-                
-                // Toque Longo (Celular)
-                let timer;
-                item.ontouchstart = () => { timer = setTimeout(() => toggleFavManual(ch), 800); };
-                item.ontouchend = () => clearTimeout(timer);
-                
-                // Botão Direito (Mouse)
-                item.oncontextmenu = (e) => { e.preventDefault(); toggleFavManual(ch); };
-
-                container.appendChild(item);
-            });
-
-            setTimeout(() => {
-                const active = document.querySelector('.menu-item.focused');
-                if (active) active.scrollIntoView({ block: "center", behavior: "smooth" });
-            }, 50);
-        }
-
-        function toggleFavManual(canal) {
+        function toggleFavorito() {
+            const canal = db[categorias[catIdx]][canalIdx];
             if(!canal) return;
-            if(favs.includes(canal.url)) favs = favs.filter(f => f !== canal.url);
-            else favs.push(canal.url);
+            if(favs.includes(canal.url)) {
+                favs = favs.filter(u => u !== canal.url);
+                db["FAVORITOS"] = db["FAVORITOS"].filter(u => u.url !== canal.url);
+            } else {
+                favs.push(canal.url);
+                db["FAVORITOS"].push(canal);
+            }
             localStorage.setItem('exna_favs', JSON.stringify(favs));
-            
-            // Recarrega Favoritos no DB interno
-            db["FAVORITOS"] = [];
-            Object.keys(db).forEach(cat => {
-                if(cat !== "FAVORITOS") {
-                    db[cat].forEach(c => { if(favs.includes(c.url)) db["FAVORITOS"].push(c); });
-                }
-            });
-            if(db["FAVORITOS"].length > 0 && !categorias.includes("FAVORITOS")) categorias.unshift("FAVORITOS");
-            
             renderizar();
             mostrarOSD("FAVORITOS ATUALIZADOS");
         }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-            fecharMenu();
+        function mostrarOSD(m) {
+            const osd = document.getElementById('osd'); osd.innerText = m;
+            osd.style.display = 'block'; clearTimeout(window.ot);
+            window.ot = setTimeout(() => osd.style.display = 'none', 3000);
+        }
+
+        function abrirMenu() { 
+            document.getElementById('side-menu').classList.add('open'); 
+            document.getElementById('brand-logo').style.opacity = "1";
+            menuAberto = true; renderizar(); 
+        }
+
+        function fecharMenu() { 
+            document.getElementById('side-menu').classList.remove('open'); 
+            setTimeout(() => { if(!menuAberto) document.getElementById('brand-logo').style.opacity = "0"; }, 5000);
+            menuAberto = false; 
         }
 
         document.addEventListener('keydown', (e) => {
-            resetMenuTimer();
             if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Backspace"].includes(e.key)) e.preventDefault();
-            
-            let totalCanais = db[categorias[catIdx]] ? db[categorias[catIdx]].length : 0;
-
             if(!menuAberto) {
                 if(e.key === "Enter" || e.key === "ArrowLeft") abrirMenu();
-                if(e.key === "ArrowUp") iniciarCanal(catIdx, (canalIdx - 1 + totalCanais) % totalCanais);
-                if(e.key === "ArrowDown") iniciarCanal(catIdx, (canalIdx + 1) % totalCanais);
+                if(e.key === "ArrowUp") iniciarCanal(catIdx, (canalIdx - 1 + db[categorias[catIdx]].length) % db[categorias[catIdx]].length);
+                if(e.key === "ArrowDown") iniciarCanal(catIdx, (canalIdx + 1) % db[categorias[catIdx]].length);
             } else {
-                if(e.key === "ArrowUp") { 
-                    canalIdx = (canalIdx - 1 < -1) ? totalCanais - 1 : canalIdx - 1;
-                    renderizar(); 
-                }
-                if(e.key === "ArrowDown") { 
-                    canalIdx = (canalIdx + 1 >= totalCanais) ? -1 : canalIdx + 1;
-                    renderizar(); 
-                }
-                if(e.key === "ArrowLeft") mudarCat(-1);
-                
-                // COMANDO PARA FAVORITAR NO CONTROLE (SETA DIREITA)
-                if(e.key === "ArrowRight") {
-                    if(canalIdx !== -1) toggleFavManual(db[categorias[catIdx]][canalIdx]);
-                    else mudarCat(1);
-                }
-                
-                if(e.key === "Enter") canalIdx === -1 ? toggleFullscreen() : iniciarCanal(catIdx, canalIdx);
+                if(e.key === "ArrowUp") { canalIdx = (canalIdx - 1 + db[categorias[catIdx]].length) % db[categorias[catIdx]].length; renderizar(); }
+                if(e.key === "ArrowDown") { canalIdx = (canalIdx + 1) % db[categorias[catIdx]].length; renderizar(); }
+                if(e.key === "ArrowLeft" || e.key === "ArrowRight") { catIdx = (catIdx === 0) ? 1 : 0; canalIdx = 0; renderizar(); }
+                if(e.key === "Enter") pressTimer = setTimeout(toggleFavorito, 1000);
                 if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
             }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if(e.key === "Enter" && menuAberto) {
+                clearTimeout(pressTimer);
+                if (Date.now() - (window.lastP || 0) < 800) iniciarCanal(catIdx, canalIdx);
+            }
+            window.lastP = Date.now();
         });
     </script>
 </body>
