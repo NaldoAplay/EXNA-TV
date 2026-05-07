@@ -8,11 +8,15 @@
     <style>
         :root { --gold: #D4AF37; --glass: rgba(10, 10, 10, 0.95); }
         * { box-sizing: border-box; outline: none; }
+        
+        /* Força o Fullscreen real no elemento body */
+        body:-webkit-full-screen { width: 100%; height: 100%; }
+        
         body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
 
         /* PLAYER TOTAL */
         #video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; display: flex; align-items: center; justify-content: center; }
-        video { width: 100% !important; height: 100% !important; object-fit: contain; }
+        video { width: 100% !important; height: 100% !important; object-fit: contain; background: #000; }
 
         /* MARCA E HORA NO TOPO */
         #top-bar { 
@@ -127,9 +131,23 @@
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
+        // --- CORREÇÃO DO FULLSCREEN AO ENTRAR ---
         function destravarApp() {
             appDestravado = true;
             document.getElementById('play-hint').style.display = 'none';
+            
+            // Ativa o modo tela cheia do navegador
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen();
+            } else if (docEl.mozRequestFullScreen) { /* Firefox */
+                docEl.mozRequestFullScreen();
+            } else if (docEl.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.msRequestFullscreen) { /* IE/Edge */
+                docEl.msRequestFullscreen();
+            }
+            
             iniciarCanal(catIdx, 0);
         }
 
@@ -231,6 +249,7 @@
         function fecharMenu() { document.getElementById('side-menu').classList.remove('open'); menuAberto = false; }
 
         document.addEventListener('keydown', (e) => {
+            // Permite destravar com o OK do controle
             if(!appDestravado && e.key === "Enter") { destravarApp(); return; }
             if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Backspace"].includes(e.key)) e.preventDefault();
             
