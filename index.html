@@ -88,35 +88,26 @@ video { width: 100%; height: 100%; object-fit: contain; }
 <div id="video-wrapper"><video id="player" playsinline></video></div>
 
 <div id="osd-full">
-    <div class="osd-header" style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
+    <div class="osd-header" style="display: flex; align-items: center; justify-content: space-between;">
         
-        <!-- LADO ESQUERDO: LOGO DO CANAL -->
-        <div id="osd-logo-box" style="width: 120px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
-            <!-- Logo inserida via Script -->
+        <div id="osd-logo-box" style="width: 90px; height: 55px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
         </div>
 
-        <!-- CENTRO: NOME DO CANAL -->
-        <div id="osd-name" class="osd-channel-name" style="flex-grow: 1; font-size: 42px; letter-spacing: -1px;">
+        <div id="osd-name" style="flex-grow: 1; font-size: 32px; font-weight: 900; margin-left: 25px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
             CARREGANDO...
         </div>
 
-        <!-- DIREITA: HORA + MARCA EXNA -->
-        <div style="text-align: right; flex-shrink: 0;">
-            <div id="osd-clock" class="osd-time" style="line-height: 1; margin-bottom: 5px;">00:00</div>
-            <div style="font-size: 14px; font-weight: 900; letter-spacing: 3px; color: var(--gold); opacity: 0.9;">
-                E<span style="color:#fff">X</span>NA <span style="color:#fff">TV</span>
+        <div style="text-align: right; margin-left: 20px;">
+            <div id="osd-clock" style="font-size: 34px; font-weight: 300; color: var(--gold); line-height: 1;">00:00</div>
+            <div style="font-size: 11px; font-weight: 900; letter-spacing: 2px; opacity: 0.8; margin-top: 4px;">
+                E<span class="gold-txt">X</span>NA TV
             </div>
         </div>
     </div>
 
-    <!-- RODAPÉ: DATA E INFOS -->
-    <div id="osd-footer" style="font-size: 14px; opacity: 0.5; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; display: flex; justify-content: space-between; font-weight: 600; letter-spacing: 1px;">
-        <span id="osd-date">DATA</span>
-        <div style="display: flex; gap: 15px;">
-            <span class="gold-txt">● 4K ULTRA HD</span>
-            <span>● LIVE STREAMING</span>
-            <span style="color: #00ff00;">● STABLE CONNECTION</span>
-        </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; opacity: 0.5; letter-spacing: 1px;">
+        <span id="osd-date">SÁBADO, 10 DE MAIO</span>
+        <span class="gold-txt">ULTRA HD ● LIVE STREAMING ● ESTÁVEL</span>
     </div>
 </div>
 
