@@ -1,278 +1,393 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EXNA TV PREMIUM</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        :root { --gold: #D4AF37; --glass: rgba(10, 10, 10, 0.95); }
-        * { box-sizing: border-box; outline: none; }
-        
-        /* Força o Fullscreen real no elemento body */
-        body:-webkit-full-screen { width: 100%; height: 100%; }
-        
-        body, html { margin: 0; padding: 0; background: #000; color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXNA TV PREMIUM</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+:root {
+    --gold: #D4AF37;
+    --menu-bg: linear-gradient(180deg, rgba(5,5,15,0.98), rgba(0,0,0,1));
+    --menu-text: #ffffff;
+    --item-bg: rgba(255,255,255,0.03);
+    --item-focus: rgba(212,175,55,0.20);
+}
 
-        /* PLAYER TOTAL */
-        #video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; display: flex; align-items: center; justify-content: center; }
-        video { width: 100% !important; height: 100% !important; object-fit: contain; background: #000; }
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+::-webkit-scrollbar { display: none !important; }
 
-        /* MARCA E HORA NO TOPO */
-        #top-bar { 
-            position: fixed; top: 0; left: 0; width: 100%; padding: 30px 50px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            z-index: 5; pointer-events: none;
-        }
-        .brand-text { font-size: 24px; font-weight: 900; letter-spacing: 2px; transition: 1s; }
-        .gold-txt { color: var(--gold); }
-        #clock { font-size: 26px; font-weight: 300; text-shadow: 2px 2px 5px #000; }
+#video-wrapper { position: fixed; inset: 0; z-index: 1; background: #000; }
+video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* MENU LATERAL VIDRO FOSCO */
-        #side-menu { 
-            position: fixed; left: -420px; top: 0; width: 400px; height: 100%; 
-            background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            z-index: 100; transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            padding: 0; border-right: 1px solid rgba(212, 175, 55, 0.3);
-            display: flex; flex-direction: column;
-        }
-        #side-menu.open { left: 0; }
-        #menu-header { padding: 30px 40px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); margin-bottom: 20px; }
+#play-hint {
+    position: fixed; inset: 0; z-index: 2000;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1593784991095-a205039470b6?q=80&w=1920') center/cover;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.welcome-card { text-align: center; backdrop-filter: blur(20px); background: rgba(255,255,255,0.03); padding: 60px; border-radius: 40px; border: 1px solid rgba(212,175,55,0.2); }
+.brand-main { font-size: 60px; font-weight: 900; color: #fff; margin: 0; letter-spacing: -2px; }
+.gold-txt { color: var(--gold); }
+.btn-play { background: var(--gold); color: #000; padding: 20px 70px; border: none; border-radius: 50px; font-size: 22px; font-weight: 900; cursor: pointer; margin-top: 30px; box-shadow: 0 10px 40px rgba(212,175,55,0.4); }
 
-        .cat-selector { display: flex; padding: 0 40px; gap: 25px; margin-bottom: 30px; }
-        .cat-tab { font-size: 14px; font-weight: bold; opacity: 0.3; cursor: pointer; color: white; }
-        .cat-tab.active { opacity: 1; color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
+#side-menu {
+    position: fixed; left: -450px; top: 0; width: 430px; height: 100%;
+    background: var(--menu-bg); backdrop-filter: blur(35px); z-index: 100;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); border-right: 1px solid rgba(255,255,255,0.05);
+    display: flex; flex-direction: column;
+}
+#side-menu.open { left: 0; }
 
-        .menu-scroll { flex-grow: 1; overflow-y: auto; padding: 0 25px; }
-        .menu-scroll::-webkit-scrollbar { width: 0; }
+.cat-selector { display: flex; gap: 8px; padding: 25px; }
+.cat-tab { flex: 1; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; font-size: 11px; font-weight: 700; text-align: center; opacity: 0.4; }
+.cat-tab.focused-tab { opacity: 1; border: 1px solid var(--gold); background: rgba(212,175,55,0.1); }
+.cat-tab.active { background: var(--gold); color: #000; opacity: 1; }
 
-        /* ITENS DA LISTA */
-        .item { 
-            padding: 12px 15px; margin-bottom: 10px; border-radius: 10px;
-            display: flex; align-items: center; gap: 15px;
-            background: rgba(255,255,255,0.03); border: 1px solid transparent;
-        }
-        .item.focused { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); transform: scale(1.02); }
+.menu-scroll { flex-grow: 1; overflow-y: scroll; padding: 0 25px 30px; scroll-behavior: smooth; }
+.item { padding: 18px; margin-bottom: 12px; border-radius: 15px; background: var(--item-bg); border: 1px solid transparent; color: var(--menu-text); font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+.item.focused { background: var(--item-focus); border-color: var(--gold); transform: scale(1.02); }
 
-        .logo-container { width: 65px; height: 45px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 4px; overflow: hidden; }
-        .chan-logo { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .exna-placeholder { font-size: 11px; font-weight: 900; text-align: center; line-height: 1.1; }
+#osd-full {
+    position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
+    width: 85%; max-width: 900px; background: rgba(0,0,0,0.88); 
+    backdrop-filter: blur(15px); border-radius: 25px; border-bottom: 5px solid var(--gold);
+    z-index: 500; display: none; padding: 30px 45px; color: #fff;
+}
+.osd-header { display: flex; justify-content: space-between; align-items: flex-end; }
+.osd-channel-name { font-size: 38px; font-weight: 900; }
+.osd-time { font-size: 42px; font-weight: 300; color: var(--gold); }
 
-        .chan-name { font-size: 16px; font-weight: 500; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .star { display: none; color: var(--gold); font-size: 18px; }
-        .item.is-fav .star { display: block; }
-
-        /* OSD - INFORMAÇÕES AO MUDAR CANAL */
-        #osd { 
-            position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.85); padding: 20px 50px; border-radius: 15px;
-            border-left: 5px solid var(--gold); z-index: 200; display: none;
-            align-items: center; gap: 30px; min-width: 500px;
-            backdrop-filter: blur(10px);
-        }
-        #osd-logo { width: 80px; height: 50px; object-fit: contain; }
-        #osd-name { font-size: 28px; font-weight: bold; letter-spacing: 1px; }
-
-        /* BOTÃO INICIAL */
-        #play-hint { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .btn-play { background: var(--gold); color: black; padding: 18px 50px; border-radius: 40px; font-weight: 900; cursor: pointer; border: none; font-size: 22px; }
-    </style>
+#settings-panel { position: absolute; inset: 0; background: rgba(5,5,10,0.99); z-index: 150; display: none; padding: 40px 30px; overflow-y: auto; }
+#settings-panel.open { display: block; }
+.config-label { font-size: 11px; font-weight: 900; color: var(--gold); letter-spacing: 2px; margin: 20px 0 10px; display: block; }
+.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.theme-btn { height: 60px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; }
+.theme-btn.focused-config { border-color: var(--gold); transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
+.logo-box {
+    width: 60px; height: 40px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+}
+.logo-box img { max-width: 90%; max-height: 90%; object-fit: contain; }
+.exna-logo-mini { font-size: 10px; font-weight: 900; color: var(--gold); text-align: center; line-height: 1; }
+</style>
 </head>
 <body>
 
-    <div id="play-hint">
-        <div class="brand-text" style="margin-bottom: 30px; font-size: 40px;">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></div>
-        <button class="btn-play" onclick="destravarApp()">ENTRAR NO APP</button>
+<div id="play-hint">
+    <div class="welcome-card">
+        <h1 class="brand-main">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></h1>
+        <p style="color: #fff; opacity: 0.5; margin-top: 10px;">PREMIUM • SEGURE ENTER PARA FAVORITAR</p>
+        <button class="btn-play" onclick="destravarApp()">ENTRAR AGORA</button>
     </div>
+</div>
 
-    <div id="top-bar">
-        <div id="brand-logo" class="brand-text">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></div>
-        <div id="clock">00:00</div>
-    </div>
+<div id="video-wrapper"><video id="player" playsinline></video></div>
 
-    <div id="video-wrapper">
-        <video id="player" playsinline></video>
-    </div>
-
-    <div id="osd">
-        <div class="logo-container" id="osd-logo-box" style="width:100px; height:60px;"></div>
-        <div id="osd-name">NOME DO CANAL</div>
-    </div>
-
-    <div id="side-menu">
-        <div id="menu-header">
-            <div class="brand-text">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></div>
+<div id="osd-full">
+    <div class="osd-header" style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
+        
+        <!-- LADO ESQUERDO: LOGO DO CANAL -->
+        <div id="osd-logo-box" style="width: 120px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+            <!-- Logo inserida via Script -->
         </div>
-        <div class="cat-selector">
-            <div id="tab-0" class="cat-tab active" onclick="mudarCat(0)">FAVORITOS</div>
-            <div id="tab-1" class="cat-tab" onclick="mudarCat(1)">TODOS OS CANAIS</div>
+
+        <!-- CENTRO: NOME DO CANAL -->
+        <div id="osd-name" class="osd-channel-name" style="flex-grow: 1; font-size: 42px; letter-spacing: -1px;">
+            CARREGANDO...
         </div>
-        <div class="menu-scroll" id="menu-list"></div>
+
+        <!-- DIREITA: HORA + MARCA EXNA -->
+        <div style="text-align: right; flex-shrink: 0;">
+            <div id="osd-clock" class="osd-time" style="line-height: 1; margin-bottom: 5px;">00:00</div>
+            <div style="font-size: 14px; font-weight: 900; letter-spacing: 3px; color: var(--gold); opacity: 0.9;">
+                E<span style="color:#fff">X</span>NA <span style="color:#fff">TV</span>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const video = document.getElementById('player');
-        const hls = new Hls();
-        const LISTA_BR = "https://iptv-org.github.io/iptv/countries/br.m3u";
-        let db = { "FAVORITOS": [], "TODOS OS CANAIS": [] }, categorias = ["FAVORITOS", "TODOS OS CANAIS"];
-        let catIdx = 0, canalIdx = 0, menuAberto = false, appDestravado = false;
-        let favs = JSON.parse(localStorage.getItem('exna_favs') || "[]");
+    <!-- RODAPÉ: DATA E INFOS -->
+    <div id="osd-footer" style="font-size: 14px; opacity: 0.5; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; display: flex; justify-content: space-between; font-weight: 600; letter-spacing: 1px;">
+        <span id="osd-date">DATA</span>
+        <div style="display: flex; gap: 15px;">
+            <span class="gold-txt">● 4K ULTRA HD</span>
+            <span>● LIVE STREAMING</span>
+            <span style="color: #00ff00;">● STABLE CONNECTION</span>
+        </div>
+    </div>
+</div>
 
-        const exnaLogoHtml = `<div class='exna-placeholder'>E<span class='gold-txt'>X</span>NA<br><span class='gold-txt'>TV</span></div>`;
+<div id="side-menu">
+    <div style="padding:40px 30px 10px;"><h2 class="brand-main" style="font-size:30px;">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></h2></div>
+    <div class="cat-selector">
+        <div class="cat-tab" id="tab-0">FAVORITOS</div>
+        <div class="cat-tab" id="tab-1">CANAIS</div>
+        <div class="cat-tab" id="tab-2">AJUSTES</div>
+    </div>
+    <div class="menu-scroll" id="menu-list"></div>
 
-        window.onload = () => {
-            carregarSistema();
-            updateClock();
-            setInterval(updateClock, 1000);
-            setTimeout(() => { document.getElementById('brand-logo').style.opacity = "0"; }, 8000);
-        };
+    <div id="settings-panel">
+    <!-- CORES DA FONTE: 12 OPÇÕES -->
+    <span class="config-label">CORES DA FONTE</span>
+    <div class="theme-grid" id="grid-fontes">
+        <div class="theme-btn" style="background:#ffffff" data-type="font" data-val="#ffffff"></div>
+        <div class="theme-btn" style="background:#00e5ff" data-type="font" data-val="#00e5ff"></div>
+        <div class="theme-btn" style="background:#ffeb3b" data-type="font" data-val="#ffeb3b"></div>
+        <div class="theme-btn" style="background:#ff4081" data-type="font" data-val="#ff4081"></div>
+        <div class="theme-btn" style="background:#7cfc00" data-type="font" data-val="#7cfc00"></div>
+        <div class="theme-btn" style="background:#ffa500" data-type="font" data-val="#ffa500"></div>
+        <div class="theme-btn" style="background:#e0e0e0" data-type="font" data-val="#e0e0e0"></div>
+        <div class="theme-btn" style="background:#d1c4e9" data-type="font" data-val="#d1c4e9"></div>
+        <div class="theme-btn" style="background:#ffccbc" data-type="font" data-val="#ffccbc"></div>
+        <div class="theme-btn" style="background:#b2dfdb" data-type="font" data-val="#b2dfdb"></div>
+        <div class="theme-btn" style="background:#f8bbd0" data-type="font" data-val="#f8bbd0"></div>
+        <div class="theme-btn" style="background:#D4AF37" data-type="font" data-val="#D4AF37"></div>
+    </div>
 
-        function updateClock() {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        }
+    <!-- TEMAS E PAISAGENS: 18 OPÇÕES VARIADAS -->
+    <span class="config-label">TEMAS E PAISAGENS</span>
+    <div class="theme-grid" id="grid-imgs">
+        <!-- NATUREZA & PAISAGENS -->
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200"></div>
+        
+        <!-- UNIVERSO & NOITE -->
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=1200"></div>
 
-        // --- CORREÇÃO DO FULLSCREEN AO ENTRAR ---
-        function destravarApp() {
-            appDestravado = true;
-            document.getElementById('play-hint').style.display = 'none';
-            
-            // Ativa o modo tela cheia do navegador
-            const docEl = document.documentElement;
-            if (docEl.requestFullscreen) {
-                docEl.requestFullscreen();
-            } else if (docEl.mozRequestFullScreen) { /* Firefox */
-                docEl.mozRequestFullScreen();
-            } else if (docEl.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
-                docEl.webkitRequestFullscreen();
-            } else if (docEl.msRequestFullscreen) { /* IE/Edge */
-                docEl.msRequestFullscreen();
-            }
-            
-            iniciarCanal(catIdx, 0);
-        }
+        <!-- GRADIENTES LIMPOS (DARK) -->
+        <div class="theme-btn" style="background:linear-gradient(135deg,#0f2027,#2c5364)" data-type="img" data-val="linear-gradient(180deg,#0f2027,#000)"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#200122,#6f0000)" data-type="img" data-val="linear-gradient(180deg,#200122,#000)"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#000428,#004e92)" data-type="img" data-val="linear-gradient(180deg,#000428,#000)"></div>
 
-        async function carregarSistema() {
-            try {
-                const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(LISTA_BR));
-                const data = await res.text();
-                parsear(data);
-                catIdx = (db["FAVORITOS"].length > 0) ? 0 : 1;
-            } catch (e) { console.error("Erro na lista"); }
-        }
+        <!-- GRADIENTES VIBRANTES -->
+        <div class="theme-btn" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)" data-type="img" data-val="linear-gradient(180deg,#833ab4,#000)"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#1e3c72,#2a5298)" data-type="img" data-val="linear-gradient(180deg,#1e3c72,#000)"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#00b09b,#96c93d)" data-type="img" data-val="linear-gradient(180deg,#00b09b,#000)"></div>
 
-        function parsear(data) {
-            const lines = data.split('\n'); let meta = "";
-            lines.forEach(line => {
-                if(line.startsWith('#EXTINF')) meta = line;
-                else if(line.startsWith('http')) {
-                    const name = meta.split(',')[1]?.trim() || "Canal";
-                    const logo = meta.match(/tvg-logo="([^"]+)"/)?.[1] || null;
-                    const url = line.trim();
-                    const obj = { name, url, logo };
-                    db["TODOS OS CANAIS"].push(obj);
-                    if(favs.includes(url)) db["FAVORITOS"].push(obj);
-                }
-            });
-        }
+        <!-- PAISAGENS CLARAS (COM OVERLAY DARK AUTOMÁTICO) -->
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200"></div>
 
-        function mostrarInformacoes(canal) {
-            const osd = document.getElementById('osd');
-            const osdName = document.getElementById('osd-name');
-            const osdLogoBox = document.getElementById('osd-logo-box');
+        <!-- ESTILO DARK/TECH -->
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200"></div>
+        <div class="theme-btn" style="background:url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=200')" data-type="img" data-val="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200"></div>
+        <div class="theme-btn" style="background:#000" data-type="img" data-val="#000"></div>
+    </div>
+</div>
 
-            osdName.innerText = canal.name;
-            osdLogoBox.innerHTML = canal.logo 
-                ? `<img id="osd-logo" src="${canal.logo}" onerror="this.parentElement.innerHTML='${exnaLogoHtml}'">`
-                : exnaLogoHtml;
+<script>
+const video = document.getElementById('player');
+const hls = new Hls();
+let db = { "FAVORITOS": [], "CANAIS": [] };
+let favUrls = JSON.parse(localStorage.getItem('exna_favs') || "[]");
 
-            osd.style.display = 'flex';
-            clearTimeout(window.osdTimer);
-            window.osdTimer = setTimeout(() => { osd.style.display = 'none'; }, 4000);
-        }
+let appDestravado = false, catIdx = 1, focusArea = 0, canalIdx = 0, menuAberto = false;
+let cfgSec = 0, cfgItem = 0, menuTimer, enterTimer;
 
-        function iniciarCanal(cI, chI) {
-            if(!appDestravado) return;
-            catIdx = cI; canalIdx = chI;
-            const canal = db[categorias[catIdx]][canalIdx];
-            if(!canal) return;
+window.onload = () => { carregarCanais(); carregarEstilos(); setInterval(updateClock, 1000); };
 
-            if (Hls.isSupported()) {
-                hls.loadSource(canal.url);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-            } else {
-                video.src = canal.url;
-                video.play();
-            }
+function updateClock() {
+    const agora = new Date();
+    if(document.getElementById('osd-clock')) {
+        document.getElementById('osd-clock').innerText = agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    }
+    if(document.getElementById('osd-date')) {
+        document.getElementById('osd-date').innerText = agora.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'});
+    }
+}
 
-            mostrarInformacoes(canal);
-            fecharMenu();
-        }
+async function carregarCanais() {
+    try {
+        const response = await fetch("https://iptv-org.github.io/iptv/countries/br.m3u");
+        const data = await response.text();
+        const blocks = data.split('#EXTINF').slice(1);
+        
+        blocks.forEach(block => {
+            const name = block.split(',')[1]?.split('\n')[0].trim();
+            const url = block.split('\n')[1]?.trim();
+            const logoMatch = block.match(/tvg-logo="([^"]+)"/);
+            const logo = logoMatch ? logoMatch[1] : null;
 
-        function renderizar() {
-            const list = document.getElementById('menu-list');
-            list.innerHTML = "";
-            document.querySelectorAll('.cat-tab').forEach((t, i) => t.classList.toggle('active', i === catIdx));
-
-            db[categorias[catIdx]].forEach((ch, i) => {
-                const item = document.createElement('div');
-                item.className = "item" + (favs.includes(ch.url) ? " is-fav" : "");
-                if (i === canalIdx) item.classList.add('focused');
-
-                const logoContent = ch.logo 
-                    ? `<img class="chan-logo" src="${ch.logo}" onerror="this.parentElement.innerHTML='${exnaLogoHtml}'">`
-                    : exnaLogoHtml;
-
-                item.innerHTML = `<div class="logo-container">${logoContent}</div><span class="chan-name">${ch.name}</span><span class="star">★</span>`;
-                item.onclick = () => iniciarCanal(catIdx, i);
-                list.appendChild(item);
-            });
-            const f = document.querySelector('.item.focused');
-            if (f) f.scrollIntoView({ block: "center" });
-        }
-
-        function toggleFavorito() {
-            const canal = db[categorias[catIdx]][canalIdx];
-            if(!canal) return;
-            if(favs.includes(canal.url)) {
-                favs = favs.filter(u => u !== canal.url);
-                db["FAVORITOS"] = db["FAVORITOS"].filter(u => u.url !== canal.url);
-            } else {
-                favs.push(canal.url);
-                db["FAVORITOS"].push(canal);
-            }
-            localStorage.setItem('exna_favs', JSON.stringify(favs));
-            renderizar();
-        }
-
-        function abrirMenu() { document.getElementById('side-menu').classList.add('open'); menuAberto = true; renderizar(); }
-        function fecharMenu() { document.getElementById('side-menu').classList.remove('open'); menuAberto = false; }
-
-        document.addEventListener('keydown', (e) => {
-            // Permite destravar com o OK do controle
-            if(!appDestravado && e.key === "Enter") { destravarApp(); return; }
-            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Backspace"].includes(e.key)) e.preventDefault();
-            
-            if(!menuAberto) {
-                if(e.key === "Enter" || e.key === "ArrowLeft") abrirMenu();
-                if(e.key === "ArrowUp") iniciarCanal(catIdx, (canalIdx - 1 + db[categorias[catIdx]].length) % db[categorias[catIdx]].length);
-                if(e.key === "ArrowDown") iniciarCanal(catIdx, (canalIdx + 1) % db[categorias[catIdx]].length);
-            } else {
-                if(e.key === "ArrowUp") { canalIdx = (canalIdx - 1 + db[categorias[catIdx]].length) % db[categorias[catIdx]].length; renderizar(); }
-                if(e.key === "ArrowDown") { canalIdx = (canalIdx + 1) % db[categorias[catIdx]].length; renderizar(); }
-                if(e.key === "ArrowLeft" || e.key === "ArrowRight") { catIdx = (catIdx === 0) ? 1 : 0; canalIdx = 0; renderizar(); }
-                if(e.key === "Enter") window.pressTimer = setTimeout(toggleFavorito, 1000);
-                if(e.key === "Escape" || e.key === "Backspace") fecharMenu();
+            if(url && url.startsWith('http')) {
+                const obj = {name, url, logo};
+                db["CANAIS"].push(obj);
+                if(favUrls.includes(url)) db["FAVORITOS"].push(obj);
             }
         });
+        if(db["FAVORITOS"].length > 0) catIdx = 0;
+    } catch (e) { console.error("Erro na lista"); }
+}
 
-        document.addEventListener('keyup', (e) => {
-            if(e.key === "Enter" && menuAberto) {
-                clearTimeout(window.pressTimer);
-                if (Date.now() - (window.lastP || 0) < 800) iniciarCanal(catIdx, canalIdx);
-            }
-            window.lastP = Date.now();
+function destravarApp() {
+    appDestravado = true; 
+    document.getElementById('play-hint').style.display = 'none';
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+    const lista = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+    if(lista.length > 0) iniciarCanal(lista[0]);
+}
+
+function iniciarCanal(c) {
+    if(!c) return;
+    if(Hls.isSupported()){ 
+        hls.loadSource(c.url); 
+        hls.attachMedia(video); 
+        hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(e=>console.log(e))); 
+    } else { video.src = c.url; video.play().catch(e=>console.log(e)); }
+    
+    // Atualiza Nome no Painel
+    document.getElementById('osd-name').innerText = (favUrls.includes(c.url) ? '★ ' : '') + c.name;
+    
+    // Atualiza Logo no Painel (Soma se não existir)
+    const osdLogo = document.getElementById('osd-logo-box');
+    if(osdLogo) {
+        osdLogo.innerHTML = c.logo 
+            ? `<img src="${c.logo}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.parentElement.style.display='none'">`
+            : "";
+        osdLogo.style.display = c.logo ? "flex" : "none";
+    }
+
+    document.getElementById('osd-full').style.display = 'block';
+    clearTimeout(window.osdTimer);
+    window.osdTimer = setTimeout(() => { document.getElementById('osd-full').style.display = 'none'; }, 5000);
+    fecharMenu();
+}
+
+function abrirMenu() { menuAberto = true; document.getElementById('side-menu').classList.add('open'); resetMenuTimer(); render(); }
+function fecharMenu() { menuAberto = false; document.getElementById('side-menu').classList.remove('open'); clearTimeout(menuTimer); }
+function resetMenuTimer() { clearTimeout(menuTimer); if(menuAberto) menuTimer = setTimeout(fecharMenu, 8000); }
+
+function toggleFavorito(canal) {
+    if(!canal) return;
+    if(favUrls.includes(canal.url)) {
+        favUrls = favUrls.filter(u => u !== canal.url);
+        db["FAVORITOS"] = db["FAVORITOS"].filter(c => c.url !== canal.url);
+    } else {
+        favUrls.push(canal.url);
+        db["FAVORITOS"].push(canal);
+    }
+    localStorage.setItem('exna_favs', JSON.stringify(favUrls));
+    render();
+}
+
+function render() {
+    const list = document.getElementById('menu-list'), panel = document.getElementById('settings-panel');
+    document.querySelectorAll('.cat-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === catIdx);
+        t.classList.toggle('focused-tab', focusArea === 0 && i === catIdx);
+    });
+
+    if (catIdx === 2) {
+        panel.classList.add('open'); list.innerHTML = ""; renderConfig();
+    } else {
+        panel.classList.remove('open'); list.innerHTML = "";
+        const items = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+        items.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = `item ${i === canalIdx && focusArea === 1 ? 'focused' : ''}`;
+            
+            const logoHtml = item.logo 
+                ? `<div style="width:40px; height:25px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><img src="${item.logo}" style="max-width:100%; max-height:100%; object-fit:contain;" onerror="this.style.display='none'"></div>`
+                : "";
+
+            div.innerHTML = `
+                ${logoHtml}
+                <span style="flex-grow:1; margin-left:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</span> 
+                ${favUrls.includes(item.url) ? '<span class="gold-txt" style="margin-left:5px;">★</span>' : ''}
+            `;
+            list.appendChild(div);
         });
-    </script>
+        const f = document.querySelector('.item.focused'); if(f) f.scrollIntoView({block:'center'});
+    }
+}
+
+function renderConfig() {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('focused-config'));
+    const grids = [document.getElementById('grid-fontes'), document.getElementById('grid-imgs')];
+    if (grids[cfgSec] && grids[cfgSec].children[cfgItem] && focusArea === 1) {
+        const target = grids[cfgSec].children[cfgItem];
+        target.classList.add('focused-config');
+        target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if(!appDestravado && e.key === "Enter") { destravarApp(); return; }
+    if(!appDestravado) return;
+    resetMenuTimer();
+
+    if(e.key === "Enter" && focusArea === 1 && catIdx !== 2) {
+        enterTimer = setTimeout(() => {
+            const lista = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+            toggleFavorito(lista[canalIdx]);
+        }, 1500);
+    }
+
+    if(!menuAberto) {
+        const zap = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+        if(!zap.length) return;
+        if(e.key === "ArrowUp") { canalIdx = (canalIdx - 1 + zap.length) % zap.length; iniciarCanal(zap[canalIdx]); }
+        if(e.key === "ArrowDown") { canalIdx = (canalIdx + 1) % zap.length; iniciarCanal(zap[canalIdx]); }
+        if(e.key === "Enter" || e.key === "ArrowLeft") abrirMenu();
+        return;
+    }
+
+    if(focusArea === 0) {
+        if(e.key === "ArrowRight") catIdx = (catIdx + 1) % 3;
+        if(e.key === "ArrowLeft") catIdx = (catIdx - 1 + 3) % 3;
+        if(e.key === "ArrowDown") { focusArea = 1; canalIdx = 0; cfgSec = 0; cfgItem = 0; }
+        if(e.key === "Backspace" || e.key === "Escape") fecharMenu();
+    } else {
+        if(catIdx === 2) {
+            if(e.key === "ArrowUp") { if(cfgSec === 0) focusArea = 0; else { cfgSec--; cfgItem = 0; } }
+            if(e.key === "ArrowDown") { if(cfgSec < 1) { cfgSec++; cfgItem = 0; } }
+            if(e.key === "ArrowRight") { 
+                const max = (cfgSec === 0) ? 11 : 17; 
+                cfgItem = Math.min(max, cfgItem + 1); 
+            }
+            if(e.key === "ArrowLeft") { if(cfgItem === 0) focusArea = 0; else cfgItem--; }
+            if(e.key === "Enter") aplicarConfig();
+        } else {
+            const items = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+            if(!items.length) { focusArea = 0; render(); return; }
+            if(e.key === "ArrowUp") { if(canalIdx === 0) focusArea = 0; else canalIdx--; }
+            if(e.key === "ArrowDown") canalIdx = Math.min(items.length - 1, canalIdx + 1);
+            if(e.key === "Enter") iniciarCanal(items[canalIdx]);
+        }
+        if(e.key === "Backspace" || e.key === "Escape") focusArea = 0;
+    }
+    render();
+});
+
+document.addEventListener('keyup', e => { if(e.key === "Enter") clearTimeout(enterTimer); });
+
+function aplicarConfig() {
+    const grids = [document.getElementById('grid-fontes'), document.getElementById('grid-imgs')];
+    const btn = grids[cfgSec].children[cfgItem];
+    if(!btn) return;
+    const val = btn.dataset.val, type = btn.dataset.type;
+    if(type === 'font') { document.documentElement.style.setProperty('--menu-text', val); localStorage.setItem('exna_f', val); }
+    else { 
+        const bg = val.includes('linear') ? val : `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('${val}') center/cover`;
+        document.documentElement.style.setProperty('--menu-bg', bg); localStorage.setItem('exna_i', val);
+    }
+}
+
+function carregarEstilos() {
+    const f = localStorage.getItem('exna_f'), i = localStorage.getItem('exna_i');
+    if(f) document.documentElement.style.setProperty('--menu-text', f);
+    if(i) {
+        const bg = i.includes('linear') ? i : `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('${i}') center/cover`;
+        document.documentElement.style.setProperty('--menu-bg', bg);
+    }
+}
+</script>
 </body>
 </html>
