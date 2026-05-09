@@ -80,7 +80,7 @@ video { width: 100%; height: 100%; object-fit: contain; }
 <div id="play-hint">
     <div class="welcome-card">
         <h1 class="brand-main">E<span class="gold-txt">X</span>NA <span class="gold-txt">TV</span></h1>
-        <p style="color: #fff; opacity: 0.5; margin-top: 10px;">PREMIUM • SEGURE ENTER PARA FAVORITAR</p>
+        <p style="color: #fff; opacity: 0.5; margin-top: 10px;">PREMIUM • SETA DIREITA PARA FAVORITAR</p>
         <button class="btn-play" onclick="destravarApp()">ENTRAR AGORA</button>
     </div>
 </div>
@@ -180,7 +180,7 @@ let db = { "FAVORITOS": [], "CANAIS": [] };
 let favUrls = JSON.parse(localStorage.getItem('exna_favs') || "[]");
 
 let appDestravado = false, catIdx = 1, focusArea = 0, canalIdx = 0, menuAberto = false;
-let cfgSec = 0, cfgItem = 0, menuTimer, enterTimer;
+let cfgSec = 0, cfgItem = 0, menuTimer;
 
 window.onload = () => { carregarCanais(); carregarEstilos(); setInterval(updateClock, 1000); };
 
@@ -266,6 +266,11 @@ function toggleFavorito(canal) {
     }
     localStorage.setItem('exna_favs', JSON.stringify(favUrls));
     render();
+    // Atualiza o nome no OSD se for o canal atual
+    const current = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"][canalIdx];
+    if(current && current.url === canal.url) {
+        document.getElementById('osd-name').innerText = (favUrls.includes(canal.url) ? '★ ' : '') + canal.name;
+    }
 }
 
 function render() {
@@ -314,11 +319,14 @@ document.addEventListener('keydown', e => {
     if(!appDestravado) return;
     resetMenuTimer();
 
-    if(e.key === "Enter" && focusArea === 1 && catIdx !== 2) {
-        enterTimer = setTimeout(() => {
-            const lista = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+    // NOVO: Favoritar com botão direito (seta direita) quando foco na lista de canais
+    if(e.key === "ArrowRight" && focusArea === 1 && catIdx !== 2) {
+        e.preventDefault();
+        const lista = db[catIdx === 0 ? "FAVORITOS" : "CANAIS"];
+        if(lista && lista[canalIdx]) {
             toggleFavorito(lista[canalIdx]);
-        }, 1500);
+        }
+        return;
     }
 
     if(!menuAberto) {
@@ -356,8 +364,6 @@ document.addEventListener('keydown', e => {
     }
     render();
 });
-
-document.addEventListener('keyup', e => { if(e.key === "Enter") clearTimeout(enterTimer); });
 
 function aplicarConfig() {
     const grids = [document.getElementById('grid-fontes'), document.getElementById('grid-imgs')];
