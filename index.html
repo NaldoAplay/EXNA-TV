@@ -9,23 +9,35 @@
         :root { --red-grad: linear-gradient(135deg, #ff0000, #8b0000); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: #fff; height: 100vh; overflow: hidden; touch-action: pan-y; }
+        
+        /* SPLASH */
         #splash { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle, #200, #000); display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .btn-enter { margin-top: 30px; padding: 16px 40px; font-size: 28px; font-weight: 900; background: var(--red-grad); border: 3px solid transparent; border-radius: 60px; color: white; cursor: pointer; min-width: 200px; text-align: center; }
         .btn-enter.focused { border-color: #fff; transform: scale(1.05); }
+        
+        /* BACKGROUND PREVIEW */
         .hero-bg { position: fixed; inset: 0; z-index: -1; }
         #bg-player { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); }
+        
+        /* LOGO GRADIENTE */
         .exna-brand { background: var(--red-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; display: inline-block; }
+        
+        /* HOME */
         .home-container { display: flex; flex-direction: row; height: 100vh; background: linear-gradient(to right, rgba(0,0,0,0.95) 30%, transparent); padding: 20px 30px; gap: 30px; overflow: hidden; }
         @media (max-width: 768px) { .home-container { flex-direction: column; padding: 15px; gap: 15px; } .sidebar { width: 100% !important; max-height: 55vh; } .details { align-items: center; text-align: center; } .details h1 { font-size: 28px !important; } }
+        
         .sidebar { width: 420px; display: flex; flex-direction: column; }
         .list-channels { flex: 1; overflow-y: auto; scrollbar-width: none; margin-top: 15px; padding-right: 5px; -webkit-overflow-scrolling: touch; }
         .list-channels::-webkit-scrollbar { display: none; }
+        
         .item { padding: 12px; display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); margin-bottom: 8px; border-radius: 12px; border: 2px solid transparent; transition: 0.1s; cursor: pointer; }
         .item.focused { background: rgba(255,255,255,0.15); border-color: #ff0000; transform: translateX(6px); }
         .item .logo-container { width: 55px; height: 38px; background: rgba(0,0,0,0.5); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .item img { max-width: 90%; max-height: 90%; object-fit: contain; }
         .item .fav-icon { margin-left: auto; color: #555; font-size: 22px; pointer-events: none; }
         .item.is-fav .fav-icon { color: #ffcc00; text-shadow: 0 0 6px #ffcc00; }
+        
+        /* DETALHES DIREITA */
         .details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .big-logo-box { width: 140px; height: 80px; margin-bottom: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
         .big-logo-box img { max-width: 80%; max-height: 80%; object-fit: contain; }
@@ -34,17 +46,28 @@
         .action-buttons { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
         .btn-mobile { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 40px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
         .btn-fav-mobile { background: rgba(255,200,0,0.2); border-color: #ffcc00; color: #ffcc00; }
+        
+        /* PLAYER FULLSCREEN */
         #player-screen { position: fixed; inset: 0; z-index: 1000; background: #000; display: none; }
         #main-video { width: 100%; height: 100%; object-fit: contain; }
-        .hud { position: absolute; bottom: 0; width: 100%; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; justify-content: space-between; align-items: flex-end; transition: opacity 0.3s; pointer-events: none; }
+        
+        /* HUD - LOGO REDUZIDA */
+        .hud { position: absolute; bottom: 0; width: 100%; padding: 20px 25px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; justify-content: space-between; align-items: flex-end; transition: opacity 0.3s; pointer-events: none; }
         .hud.hidden { opacity: 0; }
         .hud-left { display: flex; align-items: center; gap: 12px; }
         .hud-logo-box { height: 55px; width: 55px; background: rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 5px; }
+        .hud-logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .hud-left h2 { font-size: 22px; margin: 0; line-height: 1.2; }
+        .hud-left div > div:first-child { font-size: 12px; color: #ff0000; font-weight: 900; }
+        #hud-cat { font-size: 14px; color: #00ff66; }
         .clock-box { text-align: right; }
-        .clock-box .time { font-size: 28px; font-weight: bold; }
-        .clock-box .date { font-size: 14px; }
+        .clock-box .time { font-size: 24px; font-weight: bold; font-family: monospace; }
+        .clock-box .date { font-size: 12px; color: #bbb; }
+        
         .close-player-btn { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.7); border: none; color: white; font-size: 24px; padding: 6px 16px; border-radius: 40px; cursor: pointer; z-index: 1002; backdrop-filter: blur(4px); }
         @media (min-width: 769px) { .close-player-btn { display: none; } }
+        
+        /* OVERLAY DE CANAIS (LONG PRESS) */
         .channel-overlay { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); border-top-left-radius: 24px; border-top-right-radius: 24px; max-height: 70vh; z-index: 2000; transform: translateY(100%); transition: transform 0.3s ease-out; display: flex; flex-direction: column; }
         .channel-overlay.open { transform: translateY(0); }
         .overlay-header { padding: 20px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
@@ -53,192 +76,343 @@
         .overlay-item { padding: 14px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #222; cursor: pointer; }
         .overlay-item .logo-small { width: 45px; height: 35px; background: rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
         .overlay-item .logo-small img { max-width: 80%; max-height: 80%; }
+        .overlay-item .channel-name { flex: 1; font-size: 18px; }
+        .overlay-fav { color: #ffcc00; font-size: 20px; margin-right: 10px; }
         .loading-msg { font-size: 14px; color: #ffaaaa; margin-top: 8px; text-align: center; }
     </style>
 </head>
 <body tabindex="0">
-    <div id="splash"><div style="font-size: 70px; font-weight: 900; background: var(--red-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EXNA TV</div><div style="color: #999;">Ecossistemas EXNA</div><button class="btn-enter focused" id="btn-enter">ENTRAR</button></div>
-    <div class="hero-bg"><video id="bg-player" autoplay muted loop playsinline></video></div>
-    <div class="home-container" id="home-ui">
-        <div class="sidebar"><div style="font-size: 26px; font-weight: 900;"><span class="exna-brand">EXNA TV</span> BRASIL</div><div class="list-channels" id="channel-list"></div><div id="loadingIndicator" class="loading-msg" style="display: none;">🔄 Carregando canais...</div></div>
-        <div class="details"><div class="big-logo-box" id="det-logo-box"><img id="det-logo" src=""></div><div class="cat-tag" id="det-cat">--</div><h1 id="det-title">Aguarde...</h1><div class="action-buttons"><button class="btn-mobile" id="playMobileBtn">▶ ASSISTIR</button><button class="btn-mobile btn-fav-mobile" id="favMobileBtn">☆ FAVORITAR</button></div><p style="font-size: 14px; color: #aaa; margin-top: 12px;">Toque e segure no vídeo para trocar canal</p></div>
+    <div id="splash">
+        <div style="font-size: 70px; font-weight: 900; background: var(--red-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">EXNA TV</div>
+        <div style="color: #999;">Ecossistemas EXNA</div>
+        <button class="btn-enter focused" id="btn-enter">ENTRAR</button>
     </div>
-    <div id="player-screen"><button class="close-player-btn" id="closePlayerBtn">✕ FECHAR</button><video id="main-video" autoplay playsinline></video><div class="hud" id="player-hud"><div class="hud-left"><div class="hud-logo-box"><img id="hud-logo" src=""></div><div><div style="font-size: 16px; font-weight: 900; color: #ff0000;">EXNA TV APRESENTA</div><h2 id="hud-title" style="font-size: 28px;">---</h2><div id="hud-cat" style="color: #00ff66;">---</div></div></div><div class="clock-box"><div class="time" id="clock-time">00:00</div><div class="date" id="clock-date">--</div></div></div></div>
-    <div id="channelOverlay" class="channel-overlay"><div class="overlay-header"><span>EXNA TV · CANAIS</span><button class="close-overlay" id="closeOverlayBtn">✕</button></div><div class="overlay-list" id="overlayList"></div></div>
 
-<script>
-    const M3U_URL = 'https://iptv-org.github.io/iptv/countries/br.m3u';
-    const PROXY = 'https://api.allorigins.win/raw?url=';
-    let channels = [];
-    let favorites = JSON.parse(localStorage.getItem('exna_favs')) || [];
-    let idx = 0, inPlayer = false, hlsMain = null, hlsBg = null, hudTimer = null, currentBgChannelId = null, longPressTimer = null;
+    <div class="hero-bg"><video id="bg-player" autoplay muted loop playsinline></video></div>
 
-    // DOM
-    const splashDiv = document.getElementById('splash');
-    const playerDiv = document.getElementById('player-screen');
-    const bgVideo = document.getElementById('bg-player');
-    const mainVideo = document.getElementById('main-video');
-    const channelListDiv = document.getElementById('channel-list');
-    const overlayDiv = document.getElementById('channelOverlay');
-    const overlayListDiv = document.getElementById('overlayList');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const btnEnter = document.getElementById('btn-enter');
-    const playMobileBtn = document.getElementById('playMobileBtn');
-    const favMobileBtn = document.getElementById('favMobileBtn');
-    const closePlayerBtn = document.getElementById('closePlayerBtn');
-    const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+    <div class="home-container" id="home-ui">
+        <div class="sidebar">
+            <div style="font-size: 26px; font-weight: 900;"><span class="exna-brand">EXNA TV</span> BRASIL</div>
+            <div class="list-channels" id="channel-list"></div>
+            <div id="loadingIndicator" class="loading-msg" style="display: none;">🔄 Carregando canais...</div>
+        </div>
+        <div class="details">
+            <div class="big-logo-box" id="det-logo-box"><img id="det-logo" src=""></div>
+            <div class="cat-tag" id="det-cat">--</div>
+            <h1 id="det-title">Aguarde...</h1>
+            <div class="action-buttons">
+                <button class="btn-mobile" id="playMobileBtn">▶ ASSISTIR</button>
+                <button class="btn-mobile btn-fav-mobile" id="favMobileBtn">☆ FAVORITAR</button>
+            </div>
+            <p style="font-size: 14px; color: #aaa; margin-top: 12px;">Toque e segure no vídeo para trocar canal</p>
+        </div>
+    </div>
 
-    // Clock
-    function updateClock() { const now = new Date(); document.getElementById('clock-time').innerText = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }); document.getElementById('clock-date').innerText = now.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short' }); }
-    updateClock(); setInterval(updateClock, 1000);
+    <div id="player-screen">
+        <button class="close-player-btn" id="closePlayerBtn">✕ FECHAR</button>
+        <video id="main-video" autoplay playsinline></video>
+        <div class="hud" id="player-hud">
+            <div class="hud-left">
+                <div class="hud-logo-box"><img id="hud-logo" src=""></div>
+                <div>
+                    <div>EXNA TV APRESENTA</div>
+                    <h2 id="hud-title">---</h2>
+                    <div id="hud-cat">---</div>
+                </div>
+            </div>
+            <div class="clock-box">
+                <div class="time" id="clock-time">00:00</div>
+                <div class="date" id="clock-date">--</div>
+            </div>
+        </div>
+    </div>
 
-    // HLS helpers
-    function destroyHlsBg() { if (hlsBg) { try { hlsBg.destroy(); } catch(e) {} hlsBg = null; } }
-    function destroyHlsMain() { if (hlsMain) { try { hlsMain.destroy(); } catch(e) {} hlsMain = null; } }
-    function playStream(url, elementId, isMuted, retry = true) {
-        const video = document.getElementById(elementId);
-        if (!video || !url) return;
-        const isHls = url.includes('.m3u8') || url.includes('m3u8');
-        const finalUrl = isHls ? url : PROXY + encodeURIComponent(url);
-        if (elementId === 'bg-player') destroyHlsBg(); else destroyHlsMain();
-        if (Hls.isSupported() && isHls) {
-            const hls = new Hls({ enableWorker: true, backBufferLength: 20 });
-            if (elementId === 'bg-player') hlsBg = hls; else hlsMain = hls;
-            hls.loadSource(finalUrl);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(e => console.warn));
-            hls.on(Hls.Events.ERROR, (_, data) => { if (data.fatal && retry && elementId === 'main-video') setTimeout(() => playStream(url, elementId, isMuted, false), 2000); });
-        } else { video.src = finalUrl; video.play().catch(e => console.warn); }
-        video.muted = isMuted;
-    }
+    <div id="channelOverlay" class="channel-overlay">
+        <div class="overlay-header">
+            <span>EXNA TV · CANAIS</span>
+            <button class="close-overlay" id="closeOverlayBtn">✕</button>
+        </div>
+        <div class="overlay-list" id="overlayList"></div>
+    </div>
 
-    // Carregar M3U com fallback de exemplo para garantir lista visível
-    async function loadPlaylist() {
-        loadingIndicator.style.display = 'block';
-        try {
-            const res = await fetch(M3U_URL);
-            const data = await res.text();
-            parseM3U(data);
-            if (channels.length === 0) throw new Error('Sem canais');
-        } catch (err) {
-            console.warn("Erro na M3U oficial, usando canais de demonstração");
-            channels = [
-                { name: "Globo", logo: "https://logodownload.org/wp-content/uploads/2014/02/globo-logo-0.png", cat: "Aberto", id: "globo", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-                { name: "SBT", logo: "", cat: "Aberto", id: "sbt", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-                { name: "Record", logo: "", cat: "Aberto", id: "record", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-                { name: "Band", logo: "", cat: "Aberto", id: "band", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-                { name: "CNN Brasil", logo: "", cat: "Notícias", id: "cnn", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
-            ];
+    <script>
+        const M3U_URL = 'https://iptv-org.github.io/iptv/countries/br.m3u';
+        const PROXY = 'https://api.allorigins.win/raw?url=';
+        let channels = [];
+        let favorites = JSON.parse(localStorage.getItem('exna_favs')) || [];
+        let idx = 0, inPlayer = false, hlsMain = null, hlsBg = null, hudTimer = null, currentBgChannelId = null, longPressTimer = null;
+
+        // DOM elements
+        const splashDiv = document.getElementById('splash');
+        const playerDiv = document.getElementById('player-screen');
+        const bgVideo = document.getElementById('bg-player');
+        const mainVideo = document.getElementById('main-video');
+        const channelListDiv = document.getElementById('channel-list');
+        const overlayDiv = document.getElementById('channelOverlay');
+        const overlayListDiv = document.getElementById('overlayList');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const btnEnter = document.getElementById('btn-enter');
+        const playMobileBtn = document.getElementById('playMobileBtn');
+        const favMobileBtn = document.getElementById('favMobileBtn');
+        const closePlayerBtn = document.getElementById('closePlayerBtn');
+        const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+
+        // Relógio
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'short' });
         }
-        sortChannels();
-        renderList();
-        renderOverlayList();
-        idx = 0;
-        updateSelection();
-        loadingIndicator.style.display = 'none';
-    }
+        updateClock();
+        setInterval(updateClock, 1000);
 
-    function parseM3U(text) {
-        const lines = text.split('\n');
-        let cur = null;
-        channels = [];
-        for (let line of lines) {
-            if (line.startsWith('#EXTINF')) {
-                const name = line.split(',').pop().trim();
-                const logo = (line.match(/tvg-logo="([^"]+)"/) || [])[1] || '';
-                const cat = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Geral';
-                const tvgId = (line.match(/tvg-id="([^"]+)"/) || [])[1] || name;
-                cur = { name, logo, cat, id: btoa(tvgId + name), url: '' };
-            } else if (line.trim().startsWith('http') && cur) {
-                cur.url = line.trim();
-                if (cur.url && cur.name) channels.push(cur);
-                cur = null;
+        // HLS helpers
+        function destroyHlsBg() { if (hlsBg) { try { hlsBg.destroy(); } catch(e) {} hlsBg = null; } }
+        function destroyHlsMain() { if (hlsMain) { try { hlsMain.destroy(); } catch(e) {} hlsMain = null; } }
+
+        function playStream(url, elementId, isMuted, retry = true) {
+            const video = document.getElementById(elementId);
+            if (!video || !url) return;
+            const isHls = url.includes('.m3u8') || url.includes('m3u8');
+            const finalUrl = isHls ? url : PROXY + encodeURIComponent(url);
+            if (elementId === 'bg-player') destroyHlsBg(); else destroyHlsMain();
+            if (Hls.isSupported() && isHls) {
+                const hls = new Hls({ enableWorker: true, backBufferLength: 20 });
+                if (elementId === 'bg-player') hlsBg = hls; else hlsMain = hls;
+                hls.loadSource(finalUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(e => console.warn));
+                hls.on(Hls.Events.ERROR, (_, data) => {
+                    if (data.fatal && retry && elementId === 'main-video') {
+                        setTimeout(() => playStream(url, elementId, isMuted, false), 2000);
+                    }
+                });
+            } else {
+                video.src = finalUrl;
+                video.play().catch(e => console.warn);
+            }
+            video.muted = isMuted;
+        }
+
+        // Carregar M3U com fallback
+        async function loadPlaylist() {
+            loadingIndicator.style.display = 'block';
+            try {
+                const res = await fetch(M3U_URL);
+                const data = await res.text();
+                parseM3U(data);
+                if (channels.length === 0) throw new Error('Sem canais');
+            } catch (err) {
+                console.warn("Erro na M3U oficial, usando canais de demonstração");
+                channels = [
+                    { name: "Globo", logo: "https://logodownload.org/wp-content/uploads/2014/02/globo-logo-0.png", cat: "Aberto", id: "globo", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                    { name: "SBT", logo: "", cat: "Aberto", id: "sbt", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                    { name: "Record", logo: "", cat: "Aberto", id: "record", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                    { name: "Band", logo: "", cat: "Aberto", id: "band", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+                    { name: "CNN Brasil", logo: "", cat: "Notícias", id: "cnn", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+                ];
+            }
+            sortChannels();
+            renderList();
+            renderOverlayList();
+            idx = 0;
+            updateSelection();
+            loadingIndicator.style.display = 'none';
+        }
+
+        function parseM3U(text) {
+            const lines = text.split('\n');
+            let cur = null;
+            channels = [];
+            for (let line of lines) {
+                if (line.startsWith('#EXTINF')) {
+                    const name = line.split(',').pop().trim();
+                    const logo = (line.match(/tvg-logo="([^"]+)"/) || [])[1] || '';
+                    const cat = (line.match(/group-title="([^"]+)"/) || [])[1] || 'Geral';
+                    const tvgId = (line.match(/tvg-id="([^"]+)"/) || [])[1] || name;
+                    cur = { name, logo, cat, id: btoa(tvgId + name), url: '' };
+                } else if (line.trim().startsWith('http') && cur) {
+                    cur.url = line.trim();
+                    if (cur.url && cur.name) channels.push(cur);
+                    cur = null;
+                }
+            }
+            channels = channels.filter((ch, i, self) => i === self.findIndex(c => c.id === ch.id)).slice(0, 300);
+        }
+
+        function sortChannels() {
+            channels.sort((a,b) => (favorites.includes(b.id) - favorites.includes(a.id)) || a.name.localeCompare(b.name));
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+        }
+
+        function renderList() {
+            channelListDiv.innerHTML = '';
+            channels.forEach((ch, i) => {
+                const isFav = favorites.includes(ch.id);
+                const div = document.createElement('div');
+                div.className = `item ${i === idx ? 'focused' : ''} ${isFav ? 'is-fav' : ''}`;
+                div.setAttribute('data-index', i);
+                const logoHtml = ch.logo ? `<div class="logo-container"><img src="${ch.logo}" onerror="this.parentElement.style.display='none'"></div>` : `<div class="logo-container">📺</div>`;
+                div.innerHTML = `${logoHtml}<div><div style="font-size:10px; color:rgba(255,255,255,0.5);"><span class="exna-brand">EXNA TV</span></div><div style="font-size:16px; font-weight:bold;">${escapeHtml(ch.name)}</div></div><div class="fav-icon">★</div>`;
+                div.addEventListener('click', () => { idx = i; renderList(); updateSelection(); });
+                div.addEventListener('dblclick', () => { if (!inPlayer) openPlayer(); });
+                channelListDiv.appendChild(div);
+            });
+        }
+
+        function renderOverlayList() {
+            overlayListDiv.innerHTML = '';
+            channels.forEach((ch, i) => {
+                const isFav = favorites.includes(ch.id);
+                const item = document.createElement('div');
+                item.className = 'overlay-item';
+                const logoHtml = ch.logo ? `<div class="logo-small"><img src="${ch.logo}" onerror="this.style.display='none'"></div>` : `<div class="logo-small">📺</div>`;
+                item.innerHTML = `${logoHtml}<div class="channel-name">${escapeHtml(ch.name)}</div><div class="overlay-fav">${isFav ? '★' : '☆'}</div>`;
+                item.addEventListener('click', () => {
+                    idx = i;
+                    if (inPlayer) {
+                        const newCh = channels[idx];
+                        document.getElementById('hud-title').innerText = newCh.name;
+                        document.getElementById('hud-cat').innerText = newCh.cat;
+                        if (newCh.logo) document.getElementById('hud-logo').src = newCh.logo;
+                        playStream(newCh.url, 'main-video', false);
+                        showHud();
+                    } else {
+                        updateSelection();
+                    }
+                    closeOverlay();
+                });
+                overlayListDiv.appendChild(item);
+            });
+        }
+
+        function openOverlay() { renderOverlayList(); overlayDiv.classList.add('open'); }
+        function closeOverlay() { overlayDiv.classList.remove('open'); }
+
+        function updateSelection() {
+            if (!channels.length) return;
+            const ch = channels[idx];
+            document.getElementById('det-title').innerText = ch.name;
+            document.getElementById('det-cat').innerHTML = ch.cat.toUpperCase();
+            const detLogo = document.getElementById('det-logo');
+            const detBox = document.getElementById('det-logo-box');
+            if (ch.logo) { detLogo.src = ch.logo; detBox.style.display = 'flex'; detLogo.onerror = () => { detBox.style.display = 'none'; }; } else detBox.style.display = 'none';
+            if (currentBgChannelId !== ch.id) { currentBgChannelId = ch.id; playStream(ch.url, 'bg-player', true); }
+            updateFavButtonUI();
+            document.querySelectorAll('.item').forEach((el, i) => el.classList.toggle('focused', i === idx));
+            const focusedElem = document.querySelector(`.item.focused`);
+            if (focusedElem) focusedElem.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
+
+        function updateFavButtonUI() {
+            if (!channels[idx]) return;
+            const isFav = favorites.includes(channels[idx].id);
+            favMobileBtn.innerText = isFav ? '⭐ FAVORITADO' : '☆ FAVORITAR';
+            favMobileBtn.style.background = isFav ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.1)';
+        }
+
+        function toggleFavorite() {
+            const currentId = channels[idx].id;
+            if (favorites.includes(currentId)) favorites = favorites.filter(f => f !== currentId);
+            else favorites.push(currentId);
+            localStorage.setItem('exna_favs', JSON.stringify(favorites));
+            const oldId = channels[idx].id;
+            sortChannels();
+            idx = channels.findIndex(c => c.id === oldId);
+            if (idx === -1) idx = 0;
+            renderList();
+            renderOverlayList();
+            updateSelection();
+            if (inPlayer) {
+                document.getElementById('hud-title').innerText = channels[idx].name;
+                document.getElementById('hud-cat').innerText = channels[idx].cat;
+                if (channels[idx].logo) document.getElementById('hud-logo').src = channels[idx].logo;
             }
         }
-        channels = channels.filter((ch, i, self) => i === self.findIndex(c => c.id === ch.id)).slice(0, 300);
-    }
 
-    function sortChannels() { channels.sort((a,b) => (favorites.includes(b.id) - favorites.includes(a.id)) || a.name.localeCompare(b.name)); }
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-
-    function renderList() {
-        channelListDiv.innerHTML = '';
-        channels.forEach((ch, i) => {
-            const isFav = favorites.includes(ch.id);
-            const div = document.createElement('div');
-            div.className = `item ${i === idx ? 'focused' : ''} ${isFav ? 'is-fav' : ''}`;
-            div.setAttribute('data-index', i);
-            const logoHtml = ch.logo ? `<div class="logo-container"><img src="${ch.logo}" onerror="this.parentElement.style.display='none'"></div>` : `<div class="logo-container">📺</div>`;
-            div.innerHTML = `${logoHtml}<div><div style="font-size:10px; color:rgba(255,255,255,0.5);"><span class="exna-brand">EXNA TV</span></div><div style="font-size:16px; font-weight:bold;">${escapeHtml(ch.name)}</div></div><div class="fav-icon">★</div>`;
-            div.addEventListener('click', () => { idx = i; renderList(); updateSelection(); });
-            div.addEventListener('dblclick', () => { if (!inPlayer) openPlayer(); });
-            channelListDiv.appendChild(div);
-        });
-    }
-
-    function renderOverlayList() {
-        overlayListDiv.innerHTML = '';
-        channels.forEach((ch, i) => {
-            const isFav = favorites.includes(ch.id);
-            const item = document.createElement('div');
-            item.className = 'overlay-item';
-            const logoHtml = ch.logo ? `<div class="logo-small"><img src="${ch.logo}" onerror="this.style.display='none'"></div>` : `<div class="logo-small">📺</div>`;
-            item.innerHTML = `${logoHtml}<div class="channel-name">${escapeHtml(ch.name)}</div><div class="overlay-fav">${isFav ? '★' : '☆'}</div>`;
-            item.addEventListener('click', () => { idx = i; if (inPlayer) { const newCh = channels[idx]; document.getElementById('hud-title').innerText = newCh.name; document.getElementById('hud-cat').innerText = newCh.cat; if (newCh.logo) document.getElementById('hud-logo').src = newCh.logo; playStream(newCh.url, 'main-video', false); showHud(); } else updateSelection(); closeOverlay(); });
-            overlayListDiv.appendChild(item);
-        });
-    }
-
-    function openOverlay() { renderOverlayList(); overlayDiv.classList.add('open'); }
-    function closeOverlay() { overlayDiv.classList.remove('open'); }
-
-    function updateSelection() {
-        if (!channels.length) return;
-        const ch = channels[idx];
-        document.getElementById('det-title').innerText = ch.name;
-        document.getElementById('det-cat').innerHTML = ch.cat.toUpperCase();
-        const detLogo = document.getElementById('det-logo');
-        const detBox = document.getElementById('det-logo-box');
-        if (ch.logo) { detLogo.src = ch.logo; detBox.style.display = 'flex'; detLogo.onerror = () => { detBox.style.display = 'none'; }; } else detBox.style.display = 'none';
-        if (currentBgChannelId !== ch.id) { currentBgChannelId = ch.id; playStream(ch.url, 'bg-player', true); }
-        updateFavButtonUI();
-        document.querySelectorAll('.item').forEach((el, i) => el.classList.toggle('focused', i === idx));
-        const focusedElem = document.querySelector(`.item.focused`);
-        if (focusedElem) focusedElem.scrollIntoView({ behavior: 'auto', block: 'center' });
-    }
-
-    function updateFavButtonUI() { if (!channels[idx]) return; const isFav = favorites.includes(channels[idx].id); favMobileBtn.innerText = isFav ? '⭐ FAVORITADO' : '☆ FAVORITAR'; favMobileBtn.style.background = isFav ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.1)'; }
-    function toggleFavorite() { const currentId = channels[idx].id; if (favorites.includes(currentId)) favorites = favorites.filter(f => f !== currentId); else favorites.push(currentId); localStorage.setItem('exna_favs', JSON.stringify(favorites)); const oldId = channels[idx].id; sortChannels(); idx = channels.findIndex(c => c.id === oldId); if (idx === -1) idx = 0; renderList(); renderOverlayList(); updateSelection(); if (inPlayer) { document.getElementById('hud-title').innerText = channels[idx].name; document.getElementById('hud-cat').innerText = channels[idx].cat; if (channels[idx].logo) document.getElementById('hud-logo').src = channels[idx].logo; } }
-    function openPlayer() { if (!channels[idx]) return; destroyHlsBg(); bgVideo.pause(); inPlayer = true; playerDiv.style.display = 'block'; const ch = channels[idx]; document.getElementById('hud-title').innerText = ch.name; document.getElementById('hud-cat').innerText = ch.cat; const hudLogo = document.getElementById('hud-logo'); if (ch.logo) { hudLogo.src = ch.logo; hudLogo.parentElement.style.display = 'flex'; } else hudLogo.parentElement.style.display = 'none'; playStream(ch.url, 'main-video', false); showHud(); }
-    function closePlayer() { if (!inPlayer) return; inPlayer = false; playerDiv.style.display = 'none'; destroyHlsMain(); mainVideo.pause(); mainVideo.removeAttribute('src'); mainVideo.load(); updateSelection(); }
-    function showHud() { const hud = document.getElementById('player-hud'); hud.classList.remove('hidden'); clearTimeout(hudTimer); hudTimer = setTimeout(() => hud.classList.add('hidden'), 4000); }
-    function onLongPressStart(e) { if (!inPlayer) return; e.preventDefault(); longPressTimer = setTimeout(() => openOverlay(), 500); }
-    function onLongPressEnd() { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } }
-
-    // Eventos
-    mainVideo.addEventListener('touchstart', onLongPressStart); mainVideo.addEventListener('touchend', onLongPressEnd); mainVideo.addEventListener('touchcancel', onLongPressEnd); mainVideo.addEventListener('contextmenu', e => e.preventDefault());
-    playMobileBtn.addEventListener('click', () => { if (channels.length) openPlayer(); });
-    favMobileBtn.addEventListener('click', toggleFavorite);
-    closePlayerBtn.addEventListener('click', closePlayer);
-    closeOverlayBtn.addEventListener('click', closeOverlay);
-    playerDiv.addEventListener('click', (e) => { if (inPlayer && (e.target === playerDiv || e.target === mainVideo)) showHud(); });
-    window.addEventListener('keydown', (e) => {
-        if (splashDiv.style.display !== 'none') { if (e.key === 'Enter') { e.preventDefault(); btnEnter.click(); } return; }
-        if (inPlayer) {
+        function openPlayer() {
+            if (!channels[idx]) return;
+            destroyHlsBg();
+            bgVideo.pause();
+            inPlayer = true;
+            playerDiv.style.display = 'block';
+            const ch = channels[idx];
+            document.getElementById('hud-title').innerText = ch.name;
+            document.getElementById('hud-cat').innerText = ch.cat;
+            const hudLogo = document.getElementById('hud-logo');
+            if (ch.logo) { hudLogo.src = ch.logo; hudLogo.parentElement.style.display = 'flex'; } else hudLogo.parentElement.style.display = 'none';
+            playStream(ch.url, 'main-video', false);
             showHud();
-            if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Escape') { e.preventDefault(); closePlayer(); }
-            if (e.key === 'ArrowUp') { e.preventDefault(); idx = (idx - 1 + channels.length) % channels.length; openPlayer(); }
-            if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx + 1) % channels.length; openPlayer(); }
-            if (e.key === 'ArrowRight') { e.preventDefault(); toggleFavorite(); }
-        } else {
-            if (e.key === 'ArrowUp') { e.preventDefault(); idx = (idx - 1 + channels.length) % channels.length; updateSelection(); }
-            if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx + 1) % channels.length; updateSelection(); }
-            if (e.key === 'ArrowRight') { e.preventDefault(); toggleFavorite(); }
-            if (e.key === 'Enter') { e.preventDefault(); openPlayer(); }
         }
-    });
-    btnEnter.onclick = () => { splashDiv.style.display = 'none'; if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); loadPlaylist(); };
-    document.body.focus();
-</script>
+
+        function closePlayer() {
+            if (!inPlayer) return;
+            inPlayer = false;
+            playerDiv.style.display = 'none';
+            destroyHlsMain();
+            mainVideo.pause();
+            mainVideo.removeAttribute('src');
+            mainVideo.load();
+            updateSelection();
+        }
+
+        function showHud() {
+            const hud = document.getElementById('player-hud');
+            hud.classList.remove('hidden');
+            clearTimeout(hudTimer);
+            hudTimer = setTimeout(() => hud.classList.add('hidden'), 4000);
+        }
+
+        // Long press no player (mobile)
+        function onLongPressStart(e) {
+            if (!inPlayer) return;
+            e.preventDefault();
+            longPressTimer = setTimeout(() => openOverlay(), 500);
+        }
+        function onLongPressEnd() {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        }
+
+        // Eventos
+        mainVideo.addEventListener('touchstart', onLongPressStart);
+        mainVideo.addEventListener('touchend', onLongPressEnd);
+        mainVideo.addEventListener('touchcancel', onLongPressEnd);
+        mainVideo.addEventListener('contextmenu', e => e.preventDefault());
+        playMobileBtn.addEventListener('click', () => { if (channels.length) openPlayer(); });
+        favMobileBtn.addEventListener('click', toggleFavorite);
+        closePlayerBtn.addEventListener('click', closePlayer);
+        closeOverlayBtn.addEventListener('click', closeOverlay);
+        playerDiv.addEventListener('click', (e) => { if (inPlayer && (e.target === playerDiv || e.target === mainVideo)) showHud(); });
+
+        // Teclado (Android TV e teclado externo)
+        window.addEventListener('keydown', (e) => {
+            if (splashDiv.style.display !== 'none') {
+                if (e.key === 'Enter') { e.preventDefault(); btnEnter.click(); }
+                return;
+            }
+            if (inPlayer) {
+                showHud();
+                if (e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Escape') { e.preventDefault(); closePlayer(); }
+                if (e.key === 'ArrowUp') { e.preventDefault(); idx = (idx - 1 + channels.length) % channels.length; openPlayer(); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx + 1) % channels.length; openPlayer(); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); toggleFavorite(); }
+            } else {
+                if (e.key === 'ArrowUp') { e.preventDefault(); idx = (idx - 1 + channels.length) % channels.length; updateSelection(); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx + 1) % channels.length; updateSelection(); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); toggleFavorite(); }
+                if (e.key === 'Enter') { e.preventDefault(); openPlayer(); }
+            }
+        });
+
+        btnEnter.onclick = () => {
+            splashDiv.style.display = 'none';
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+            loadPlaylist();
+        };
+        document.body.focus();
+    </script>
 </body>
 </html>
